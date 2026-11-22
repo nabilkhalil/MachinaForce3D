@@ -119,3 +119,36 @@ Max/min/mean deviation, area in tolerance, form error (max over X of the range a
 
 ## Limits
 Rigid workpiece and machine; linear holder springs; no runout, no holder-taper contact nonlinearity, no dynamics/chatter, no thermal effects; static stress only (no fatigue/impact/stress concentration).
+
+
+---
+
+# Module 3 — Chatter and dynamic instability
+
+File: `chatter.ts`. This model is dynamic and independent of the quasi-static Modules 1–2.
+
+## Structure
+Tool + holder + spindle: one mode per direction in the feed frame (x = feed, y = normal), m q̈ + c q̇ + k q = F, receptance G(f) = 1/(k(1 − r² + 2iζr)). Workpiece rigid; no x–y cross terms. Dynamic stiffness = 1/|G|, minimum ≈ 2kζ near resonance.
+
+## Regenerative chip thickness
+h_j = [fz sin φj + (d(t) − d(t−T))·n] g(φj), n = (sin φj, cos φj), T = tooth period. g = 1 in the engagement arc when h > 0, else the tooth is out of cut. With surface memory, the "previous surface" is the last surface actually cut at that angular position, with the accumulated feed if teeth were out (multiple regeneration).
+
+## Zero-order approximation (stability lobes)
+Average directional factors over [φst, φex] (Altintas):
+αxx = ½[cos2φ − 2Krφ + Kr sin2φ], αxy = ½[−sin2φ − 2φ + Kr cos2φ], αyx = ½[−sin2φ + 2φ + Kr cos2φ], αyy = ½[−cos2φ − 2Krφ − Kr sin2φ].
+Eigenvalues μ of [α][Φ(iωc)] give Λ = −1/μ; a_lim = −(2πΛR/(N Kt))(1+κ²), κ = ΛI/ΛR, ε = π − 2 atan κ, T = (ε + 2kπ)/ωc, n = 60/(N T). Curves are built per eigen-branch and lobe number in chatter-frequency order; the envelope is the lowest lobe at each speed. Benchmark: slotting with only y flexible gives a_lim,min = 8kζ(1+ζ)/(N Krc).
+
+## Time-domain simulation
+Exact state transition of each underdamped mode over Δt = T/64 with zero-order hold on the force (evaluated at the step midpoint to avoid entry/exit sampling artefacts); 240 tooth periods by default; the last 40 % is analysed.
+- **Chatter test:** sample x, y once per tooth period at a fixed phase. Stable forced vibration is tooth-periodic, so the samples coincide; chatter adds non-synchronous motion. Verdict "chatter" when rms(sample scatter)/rms(motion) > 0.1.
+- **Spectrum:** Hann-windowed FFT of y; the dominant peak is classed as a tooth-passing harmonic (forced) or not (chatter frequency).
+- **Boundary:** for each speed, bisection on ap with the verdict above.
+
+## Forced response
+Force over one tooth period with a rigid tool → Fourier harmonics F_k at k·f_tp → X_k = G(k f_tp)·F_k.
+
+## Tap-test fit
+Peak picking on the measured receptance: fn at the minimum of Im G, ζ from the half-power bandwidth of |G|, k = −1/(2ζ Im_min).
+
+## Validity
+ZOA is reliable at moderate to high radial immersion and optimistic at low immersion; the time-domain result is the reference there. Not modelled: process damping, speed-dependent spindle dynamics, runout, variable pitch/helix, workpiece modes.

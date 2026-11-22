@@ -1,6 +1,6 @@
 # Verification record
 
-Run with `npm test`. Last run: 2026-11-22, **68 / 68 passed** (Module 1: 47, Module 2: 21) (Vitest 3, Node 22).
+Run with `npm test`. Last run: 2026-11-22, **88 / 88 passed** (Module 1: 47, Module 2: 21, Module 3: 20)
 
 Verification shows that the equations are implemented and solved correctly against
 analytical benchmarks. It does **not** validate the cutting coefficients or the physical
@@ -23,6 +23,11 @@ measured forces and measured wall thickness (see the in-app *Validate* stage).
 | **M2** Holder springs | extra tip deflection P/kT + PL²/kR | ≤ 0.2 % |
 | **M2** Holder moment and stress | M(0) = P·a, σ = M·c/I | exact |
 | **M2** Tool first bending frequency | uniform cantilever (1.875²/2π)√(EI/ρAL⁴) | ≤ 2 % |
+| **M3** Receptance | G(0) = 1/k, \|G(fn)\| = 1/(2kζ), min Re G = −1/(4kζ(1+ζ)) | ≤ 0.1 % |
+| **M3** Discrete modal integration | static step → 1/k; harmonic amplitude → \|G(f)\| | ≤ 0.5 % |
+| **M3** ZOA lobes, slotting, y-flexible | a_lim,min = 8kζ(1+ζ)/(N·Krc) | ≤ 2 % |
+| **M3** ZOA vs independent time-domain simulation | stable at 0.6·a_ZOA, chatter at 1.5·a_ZOA (ae/D = 0.25, 0.5, 1; several speeds) | all points |
+| **M3** Tap-test peak picking | recovers fn, ζ, k of a synthetic FRF | ≤ 3 % |
 
 ## Test list
 
@@ -73,6 +78,26 @@ measured forces and measured wall thickness (see the in-app *Validate* stage).
 - Teaching content: Stage C production problem > at least one admissible strategy meets tolerance and productivity (the problem is solvable)
 - Teaching content: Stage C production problem > B4 prediction holds in the model: single-side finishing leaves more error than alternating
 - Teaching content: Stage C production problem > B2 prediction holds in the model: doubling fz raises peak force by less than 2×
+- Modal model (FRF and discretisation) > receptance: G(0) = 1/k and |G(fn)| = 1/(2kζ)
+- Modal model (FRF and discretisation) > minimum real part = −1/(4kζ(1+ζ)) near fn√(1+2ζ)
+- Modal model (FRF and discretisation) > exact discretisation: static step → 1/k, harmonic amplitude → |G(f)|
+- Modal model (FRF and discretisation) > spectrum: a pure sine peaks at its frequency with its amplitude
+- Stability lobes (zero-order approximation) > slotting directional factors: αxx = αyy = −πKr, αxy = −π, αyx = π
+- Stability lobes (zero-order approximation) > closed form (slotting, flexible only in y): a_lim,min = 8kζ(1+ζ)/(N·Krc) within 2 %
+- Stability lobes (zero-order approximation) > largest pocket where the tooth-passing frequency equals fn (n = 60·fn/N)
+- Stability lobes (zero-order approximation) > lobe heights scale with stiffness and (approximately) with damping
+- Stability lobes (zero-order approximation) > slotting is less stable than half immersion
+- Time-domain regenerative simulation and chatter detection > very shallow cut: stable, dominant vibration at a tooth-passing harmonic
+- Time-domain regenerative simulation and chatter detection > deep cut in a trough: chatter, dominant frequency NOT a harmonic and near fn
+- Time-domain regenerative simulation and chatter detection > chatter is decided by motion, not force: a stable cut can have a larger peak force than a chattering one
+- Time-domain regenerative simulation and chatter detection > cross-validation (ae = 8 mm): time domain stable at 0.6·a_ZOA and chattering at 1.5·a_ZOA
+- Time-domain regenerative simulation and chatter detection > cross-validation (ae = 16 mm): time domain stable at 0.6·a_ZOA and chattering at 1.5·a_ZOA
+- Time-domain regenerative simulation and chatter detection > cross-validation (ae = 4 mm): time domain stable at 0.6·a_ZOA and chattering at 1.5·a_ZOA
+- Time-domain regenerative simulation and chatter detection > low immersion: ZOA is optimistic somewhere in the range (time domain finds chatter below the ZOA lobe)
+- Time-domain regenerative simulation and chatter detection > jump-out with multiple regeneration bounds the chatter amplitude (limit cycle, no divergence)
+- Tap-test fitting > peak picking recovers fn, ζ and k from a synthetic FRF within 3 %
+- Module 3 production problem > the baseline chatters
+- Module 3 production problem > an admissible chatter-free solution reaches the MRR target
 - Stepped tool beam vs closed-form cantilever solutions > uniform section, tip load: δ = PL³/(3EI) within 0.1 %
 - Stepped tool beam vs closed-form cantilever solutions > uniform section, load at a < L: δ(L) = Pa²(3L − a)/(6EI)
 - Stepped tool beam vs closed-form cantilever solutions > two-section (shank + flutes), tip load: δ = P[(L³−L₂³)/(3EI₁) + L₂³/(3EI₂)]

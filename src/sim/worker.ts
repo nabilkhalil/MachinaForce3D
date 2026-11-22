@@ -1,14 +1,23 @@
 /// <reference lib="webworker" />
 import { simulate, type ProcessParams } from '../physics/process';
 import { simulatePocket, type PocketParams } from '../physics/pocketProcess';
+import { analyseChatter, timeDomainBoundary, type ChatterParams } from '../physics/chatter';
 
-type Msg = { id: number; kind: 'thinwall'; params: ProcessParams } | { id: number; kind: 'pocket'; params: PocketParams };
+type Msg =
+  | { id: number; kind: 'thinwall'; params: ProcessParams }
+  | { id: number; kind: 'pocket'; params: PocketParams }
+  | { id: number; kind: 'chatter'; params: ChatterParams }
+  | { id: number; kind: 'chatterBoundary'; params: ChatterParams };
 
 self.onmessage = (ev: MessageEvent<Msg>) => {
   const m = ev.data;
   try {
     const t0 = performance.now();
-    const result = m.kind === 'pocket' ? simulatePocket(m.params) : simulate(m.params);
+    const result =
+      m.kind === 'pocket' ? simulatePocket(m.params)
+      : m.kind === 'chatter' ? analyseChatter(m.params)
+      : m.kind === 'chatterBoundary' ? timeDomainBoundary(m.params, 40, 12, 8, 200)
+      : simulate(m.params);
     (self as unknown as Worker).postMessage({ id: m.id, result, ms: performance.now() - t0 });
   } catch (err) {
     (self as unknown as Worker).postMessage({ id: m.id, error: String(err) });

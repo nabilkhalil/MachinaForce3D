@@ -20,14 +20,15 @@ MachinaForce 3D lets you **see** cutting forces. You set up a milling operation 
 2. [The screen at a glance](#the-screen-at-a-glance)
 3. [Module 1 — Thin-wall milling: step by step](#module-1--thin-wall-milling-step-by-step)
 4. [Module 2 — Tool bending in a deep pocket: step by step](#module-2--tool-bending-in-a-deep-pocket-step-by-step)
-5. [The three learning stages and your score](#the-three-learning-stages-and-your-score)
-6. [Reading the results correctly](#reading-the-results-correctly)
-7. [Key equations](#key-equations)
-8. [Tips, common mistakes and FAQ](#tips-common-mistakes-and-faq)
-9. [Panduan ringkas (Bahasa Melayu)](#panduan-ringkas-bahasa-melayu)
-10. [For lecturers](#for-lecturers)
-11. [For developers](#for-developers)
-12. [References](#references)
+5. [Module 3 — Chatter: step by step](#module-3--chatter-step-by-step)
+6. [The three learning stages and your score](#the-three-learning-stages-and-your-score)
+7. [Reading the results correctly](#reading-the-results-correctly)
+8. [Key equations](#key-equations)
+9. [Tips, common mistakes and FAQ](#tips-common-mistakes-and-faq)
+10. [Panduan ringkas (Bahasa Melayu)](#panduan-ringkas-bahasa-melayu)
+11. [For lecturers](#for-lecturers)
+12. [For developers](#for-developers)
+13. [References](#references)
 
 ---
 
@@ -102,6 +103,21 @@ The same X/Y/Z frame is used in the 3D view, the graphs, the equations and the C
 
 ---
 
+## Module 3 — Chatter: step by step
+
+**The problem.** Push the axial depth too far and the cut starts to "sing": the tool vibrates on its own, leaves wavy marks and can break. This is **regenerative chatter**. Each tooth cuts the wavy surface left by the previous one, so the vibration feeds itself. It is a **dynamic** effect, so Module 3 uses a separate dynamic model.
+
+![Module 3 — stability lobes](docs/images/module3-lobes.png)
+
+1. **Select Module 3.** The baseline (6 000 rpm, ap = 1.2 mm) chatters. Press **Play** and watch the tool shake (×60) and the chatter marks appear on the machined face.
+2. **Read the verdict banner.** *Chatter* is decided from the **motion**, never from the force level. Open **Vibration vs time**: the amber dots, sampled once per tooth, scatter. In **Vibration spectrum** the main peak (≈ 613 Hz) is **not** a tooth-passing harmonic.
+3. **Open the Stability lobe diagram.** Below the curve is stable; above is chatter. Your cut is the red or green dot. Press **Compute time-domain boundary** to check the analytical lobes against an independent simulation: they should almost overlap.
+4. **Find the pocket.** Click the chart near **9 000 rpm** (tooth-passing frequency = natural frequency). The cut becomes stable even with a much deeper ap. Slower is *not* always safer.
+5. **Experiment** with damping ζ, stiffness k, natural frequency fn and radial depth ae. Try ae = 1.5 mm and compare the two methods: at low immersion the analytical lobes are too optimistic.
+6. **Validate (lab):** upload a tap-test FRF to fit fn, ζ and k for your own tool, then upload your test cuts to see them on the lobe diagram.
+
+---
+
 ## The three learning stages and your score
 
 | Stage | What you do | Points |
@@ -115,7 +131,7 @@ The same X/Y/Z frame is used in the 3D view, the graphs, the equations and the C
 - Your justification is checked automatically only for length and key concepts. **Your lecturer grades the reasoning.**
 - **Report** downloads an HTML report with your score, configuration, answers and trials, plus a CSV of your trials.
 
-Lab worksheets: [Module 1 worksheet](docs/WORKSHEET.md) · [Module 2 worksheet](docs/WORKSHEET_M2.md)
+Lab worksheets: [Module 1 worksheet](docs/WORKSHEET.md) · [Module 2 worksheet](docs/WORKSHEET_M2.md) · [Module 3 worksheet](docs/WORKSHEET_M3.md)
 
 ---
 
@@ -124,7 +140,7 @@ Lab worksheets: [Module 1 worksheet](docs/WORKSHEET.md) · [Module 2 worksheet](
 - **Peak elastic deflection is not the final error.** The wall or tool springs back after the cutter passes. The final error is the relative deflection at the instant each point of the surface is generated.
 - **Positive deviation = material left** (wall too thick or proud). Negative = overcut.
 - **"estimate"** means the cutting coefficients are illustrative, not measured. Treat the trends as reliable and the absolute numbers as approximate.
-- **The model is quasi-static.** The *Dynamics check* compares the tooth-passing frequency with the natural frequency. If the ratio is high, real vibration (chatter) may be worse than predicted.
+- **Modules 1 and 2 are quasi-static.** Their *Dynamics check* compares the tooth-passing frequency with the natural frequency. If the ratio is high, open **Module 3**, which models vibration and chatter properly.
 - **Orange warnings** flag physically doubtful set-ups: holder collision, engaged length longer than the flutes, very long tools, excessive stress.
 
 ---
@@ -142,6 +158,9 @@ Lab worksheets: [Module 1 worksheet](docs/WORKSHEET.md) · [Module 2 worksheet](
 | Cutting speed | vc = π · D · n / 1000 (m/min) |
 | Tooth-passing frequency | f_tp = n · N / 60 (Hz) |
 | Cantilever deflection | δ = F · L³ / (3 · E · I), with I = b · t³ / 12 for a wall and π·d⁴/64 for a tool |
+| Tool receptance (Module 3) | G(f) = 1 / (k (1 − r² + 2iζr)), r = f/fn |
+| Stability pockets | n ≈ 60 · fn / (N (k + 1)), k = 0, 1, 2 … |
+| Minimum stable depth (slotting, one flexible direction) | a_lim,min = 8 k ζ (1 + ζ) / (N · Krc) |
 
 Open **Equations** in the app for the full model and the sign convention.
 
@@ -155,14 +174,15 @@ Open **Equations** in the app for the full model and the sign convention.
 - **Lost your settings?** *Reset* restores the baseline. Saved trials stay until you press *Clear*.
 - **Are my answers sent anywhere?** No. Everything stays in your browser. Use *Report* to hand in your work.
 - **Can I use my own cutting coefficients?** Yes: *Cutting-force coefficients* in the left panel. Tick "calibrated" only if they come from your own dynamometer tests.
-- **Why are Modules 3–6 greyed out?** They are planned and not yet available. The app never presents an unfinished module as working.
+- **Why are Modules 4–6 greyed out?** They are planned and not yet available. The app never presents an unfinished module as working.
+- **The lobes and the time-domain dots disagree?** Near the boundary and at low radial immersion this is expected. Trust the time-domain verdict and treat the point as marginal.
 
 ---
 
 ## Panduan ringkas (Bahasa Melayu)
 
 1. Buka aplikasi: <https://nabilkhalil.github.io/MachinaForce3D/> (Chrome/Edge/Firefox, komputer riba disyorkan).
-2. Pilih **Module 1** (dinding nipis) atau **Module 2** (lenturan mata alat dalam poket dalam) di bahagian atas kiri.
+2. Pilih **Module 1** (dinding nipis), **Module 2** (lenturan mata alat dalam poket dalam) atau **Module 3** (getaran *chatter*) di bahagian atas kiri.
 3. Tekan **▶ Play**. Anak panah **hijau (Fy)** ialah daya yang menolak dinding dan mata alat menjauhi satu sama lain.
 4. Tandakan **Learning overlay** untuk penerangan setiap parameter.
 5. Ikut **Lab guide**: **A · Observe → B · Experiment → C · Solve**. Ramal dahulu, kemudian ubah **satu** parameter sahaja dan simpan setiap percubaan (*Save current as trial*).
@@ -174,10 +194,11 @@ Nota: nilai daya dan pesongan ialah **anggaran model** (pekali pemotongan ilustr
 
 ## For lecturers
 
-- **Modules:** 1 Thin-wall milling ✅ · 2 Tool bending in deep pockets ✅ · 3 Chatter · 4 Turning slender shafts · 5 Fixture stiffness · 6 Tool wear (planned)
+- **Modules:** 1 Thin-wall milling ✅ · 2 Tool bending in deep pockets ✅ · 3 Chatter and dynamic instability ✅ · 4 Turning slender shafts · 5 Fixture stiffness · 6 Tool wear (planned)
+- **Tap-test link (Module 3):** students can fit fn, ζ, k from an impact-hammer FRF (`freq_hz, real, imag` in m/N) and plot their cutting tests (`rpm, ap_mm, chatter`) on the lobe diagram.
 - **Lab link:** the *Validate* stage compares the model with a measured force signal (`angle_deg` or `time_s`, `FX_N`, `FY_N`, `FZ_N`) and with measured wall thickness (Module 1) or wall deviation (Module 2). It reports RMSE and percentage error. *Synthetic example* buttons generate clearly labelled practice files.
 - **Offline / LMS:** `npm run build:single` produces one self-contained HTML file that can be uploaded to URLearn or opened without internet.
-- **Verification:** 68 automated tests compare the numerical models with analytical solutions (closed-form mean forces, cantilever and stepped-beam deflections, natural frequencies, mesh convergence, volume conservation). See [docs/VALIDATION.md](docs/VALIDATION.md). Verification shows the equations are solved correctly; validation against your own measurements is still required before quoting absolute values.
+- **Verification:** 88 automated tests compare the numerical models with analytical solutions (closed-form mean forces, cantilever and stepped-beam deflections, natural frequencies, mesh convergence, volume conservation, closed-form stability limits, and analytical lobes cross-checked against an independent time-domain simulation). See [docs/VALIDATION.md](docs/VALIDATION.md). Verification shows the equations are solved correctly; validation against your own measurements is still required before quoting absolute values.
 - **Documentation:** [docs/PHYSICS.md](docs/PHYSICS.md) (models, sign convention, assumptions) · [docs/PROGRESS.md](docs/PROGRESS.md) (milestones, limitations).
 
 ---
@@ -187,7 +208,7 @@ Nota: nilai daya dan pesongan ialah **anggaran model** (pekali pemotongan ilustr
 ```bash
 npm ci
 npm run dev          # http://localhost:5173
-npm test             # 68 verification tests (Vitest)
+npm test             # 88 verification tests (Vitest)
 npm run build        # production build → dist/
 npm run build:single # one self-contained HTML file → dist-single/index.html
 ```

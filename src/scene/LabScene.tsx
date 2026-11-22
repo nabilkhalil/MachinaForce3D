@@ -10,6 +10,8 @@ import { Forces, module1ForceView } from './Forces';
 import { playback, useApp } from '../state/store';
 import { usePocket } from '../state/pocketStore';
 import { PocketWall, BentTool, PocketDims, pocketForceView } from './m2/PocketScene';
+import { ChatterScene, chatterForceView } from './m3/ChatterScene';
+import { useChatter } from '../state/chatterStore';
 
 function Env() {
   const { gl, scene } = useThree();
@@ -27,7 +29,10 @@ function PlaybackDriver() {
   const module = useApp((s) => s.module);
   const r1 = useApp((s) => s.result);
   const r2 = usePocket((s) => s.result);
-  const result = module === 2 ? r2 : r1;
+  const r3 = useChatter((s) => s.result);
+  const nStations = module === 3 ? (r3 ? r3.sim.x.length : 0) : module === 2 ? (r2 ? r2.stations.length : 0) : r1 ? r1.stations.length : 0;
+  const rate = module === 3 ? (r3 ? r3.sim.stepsPerTooth * 2 : 128) : 4; // module 3: 2 tooth periods per second at 1×
+  const result = nStations > 0 ? { stations: { length: nStations } } : null;
   const setCursor = useApp((s) => s.setCursor);
   const setPlaying = useApp((s) => s.setPlaying);
   const acc = useRef(0);
@@ -35,8 +40,8 @@ function PlaybackDriver() {
     if (!result) return;
     const dt = Math.min(dtRaw, 0.1);
     if (playback.playing) {
-      playback.station += dt * 4 * playback.speed;
-      playback.phi = (playback.phi + dt * playback.spinRate * 2 * Math.PI * Math.min(playback.speed, 2)) % (2 * Math.PI);
+      playback.station += dt * rate * playback.speed;
+      if (module !== 3) playback.phi = (playback.phi + dt * playback.spinRate * 2 * Math.PI * Math.min(playback.speed, 2)) % (2 * Math.PI);
       if (playback.station >= result.stations.length - 1) {
         playback.station = result.stations.length - 1;
         setPlaying(false);
@@ -112,7 +117,7 @@ function CameraRig() {
   const H1 = useApp((s) => s.params.wallHeight);
   const L2 = usePocket((s) => s.params.wallLength);
   const H2 = usePocket((s) => s.params.pocketDepth);
-  const L = module === 2 ? L2 : L1, H = module === 2 ? H2 : H1;
+  const L = module === 3 ? 80 : module === 2 ? L2 : L1, H = module === 3 ? 20 : module === 2 ? H2 : H1;
   const preset = useApp((s) => s.view.camPreset);
   const nonce = useApp((s) => s.view.camNonce);
   useEffect(() => {
@@ -158,16 +163,21 @@ export function LabScene() {
             <WallMesh />
             <Tool />
           </>
-        ) : (
+        ) : module === 2 ? (
           <>
             <PocketWall />
             <BentTool />
+          </>
+        ) : (
+          <>
+            <Fixture />
+            <ChatterScene />
           </>
         )}
         <Dimensions />
         <PocketDims />
         {/* shared across modules so their Html labels are never unmounted */}
-        <Forces getView={module === 2 ? pocketForceView : module1ForceView} />
+        <Forces getView={module === 3 ? chatterForceView : module === 2 ? pocketForceView : module1ForceView} />
         <AxisTriad at={[-24, -26, 0]} />
       </group>
       <gridHelper args={[4000, 40, '#1e3a5f', '#14243a']} position={[25, -715, 0]} />

@@ -8,14 +8,20 @@ import { ResultsPanel2 } from './ui/m2/ResultsPanel2';
 import { BottomPanel2 } from './ui/m2/BottomPanel2';
 import { usePocket } from './state/pocketStore';
 import { POCKET_ASSUMPTIONS } from './content/pocket';
+import { ParamPanel3 } from './ui/m3/ParamPanel3';
+import { ResultsPanel3 } from './ui/m3/ResultsPanel3';
+import { BottomPanel3 } from './ui/m3/BottomPanel3';
+import { useChatter } from './state/chatterStore';
+import { CHATTER_ASSUMPTIONS } from './content/chatter';
 import { useEffect } from 'react';
 import { StagePanel } from './ui/StagePanel';
 import { Btn, Modal, Tag, Toggle } from './ui/controls';
 import { useApp, type ModuleId, type Stage, type ViewState } from './state/store';
 
-const ParamPanel = () => (useApp((s) => s.module) === 2 ? <ParamPanel2 /> : <ParamPanel1 />);
-const ResultsPanel = () => (useApp((s) => s.module) === 2 ? <ResultsPanel2 /> : <ResultsPanel1 />);
-const BottomPanel = () => (useApp((s) => s.module) === 2 ? <BottomPanel2 /> : <BottomPanel1 />);
+const pick = <T,>(m: number, a: T, b: T, c: T) => (m === 3 ? c : m === 2 ? b : a);
+const ParamPanel = () => pick(useApp((s) => s.module), <ParamPanel1 />, <ParamPanel2 />, <ParamPanel3 />);
+const ResultsPanel = () => pick(useApp((s) => s.module), <ResultsPanel1 />, <ResultsPanel2 />, <ResultsPanel3 />);
+const BottomPanel = () => pick(useApp((s) => s.module), <BottomPanel1 />, <BottomPanel2 />, <BottomPanel3 />);
 import { ASSUMPTIONS, MODULES, REFERENCES } from './content/learning';
 import { FORCE_COLORS } from './scene/Forces';
 
@@ -47,7 +53,8 @@ function ViewToolbar() {
           </label>
           {module === 1 && <Toggle label="Undeformed ghost" checked={v.showGhost} onChange={t('showGhost')} />}
           {module === 2 && <p className="text-[10px] leading-snug text-slate-500">Exaggeration applies to tool bending and to the wall offset. Wall colour = deviation from nominal.</p>}
-          <div className={`flex items-center gap-1 text-[11px] ${module === 2 ? 'hidden' : ''}`}>
+          {module === 3 && <p className="text-[10px] leading-snug text-slate-500">Exaggeration applies to the simulated tool vibration. Machined-face colour = vibration amplitude (chatter marks).</p>}
+          <div className={`flex items-center gap-1 text-[11px] ${module !== 1 ? 'hidden' : ''}`}>
             <span className="text-slate-400">Colour</span>
             {([['displacement', 'displacement'], ['thickness', 'thickness dev.']] as const).map(([k, l]) => (
               <button key={k} onClick={() => setView({ colorMode: k })} className={`rounded px-1.5 py-0.5 ${v.colorMode === k ? 'bg-cyan-700 text-white' : 'bg-slate-800 text-slate-300'}`}>{l}</button>
@@ -121,6 +128,17 @@ Generated wall (rigid): y_s = y_target + g(z)·FY,  deviation d = −y_s (+ = pr
 Spring pass: repeat the level → engages only the residual.  Compensation: offset level by its predicted mean error.
 Tool f₁ (Rayleigh, self-weight shape):  ω² = g Σ m δ / Σ m δ²`}</pre>
         </section>
+        <section>
+          <h3 className="font-semibold text-cyan-300">Module 3 — chatter (dynamic model)</h3>
+          <pre className="whitespace-pre-wrap rounded bg-slate-950 p-2 text-[12px] text-slate-200">{`Tool modes (x = feed, y = normal):  m q̈ + c q̇ + k q = F,   G(f) = 1 / (k (1 − r² + 2iζr)),  r = f/fn
+Regenerative chip:  h_j = [ fz sin φj + (d(t) − d(t−T))·n ] g(φj),   n = (sin φj, cos φj),   T = 60/(n_s N)
+  (tooth out of cut when h ≤ 0; surface memory handles multiple regeneration)
+ZOA lobes:  det(I + Λ[α0][Φ(iωc)]) = 0,  Λ = −(N/4π) a Kt (1 − e^(−iωcT))
+  a_lim = −(2π ΛR/(N Kt))(1 + κ²),  κ = ΛI/ΛR,  ε = π − 2 atan κ,  T = (ε + 2kπ)/ωc,  n = 60/(N T)
+Slotting, y-flexible only:  a_lim,min = 8 k ζ (1+ζ) / (N Krc)
+Pockets:  f_tp ≈ fn/(k+1)   →   n ≈ 60 fn / (N (k+1))
+Chatter test (time domain): once-per-tooth samples scatter > 10 % of motion rms; dominant frequency not a tooth harmonic`}</pre>
+        </section>
       </div>
     </Modal>
   );
@@ -134,7 +152,7 @@ function AssumptionsModal({ onClose }: { onClose: () => void }) {
         <Tag kind="validated">calibrated</Tag><span className="text-slate-400">coefficients you confirmed from your own tests (validation still requires comparison with measurements)</span>
         <Tag kind="assumption">assumption</Tag><span className="text-slate-400">modelling idealisation</span>
       </div>
-      {[...ASSUMPTIONS, ...POCKET_ASSUMPTIONS].map((g) => (
+      {[...ASSUMPTIONS, ...POCKET_ASSUMPTIONS, ...CHATTER_ASSUMPTIONS].map((g) => (
         <div key={g.title} className="mb-3">
           <h3 className="font-semibold text-cyan-300">{g.title}</h3>
           <ul className="ml-5 list-disc space-y-0.5 text-[13px] text-slate-300">{g.items.map((i) => <li key={i}>{i}</li>)}</ul>
@@ -193,13 +211,15 @@ export default function App() {
   const setModule = useApp((s) => s.setModule);
   const reset1 = useApp((s) => s.resetParams);
   const reset2 = usePocket((s) => s.resetParams);
-  const reset = module === 2 ? reset2 : reset1;
+  const reset3 = useChatter((s) => s.resetParams);
+  const reset = pick(module, reset1, reset2, reset3);
   const err1 = useApp((s) => s.error);
   const err2 = usePocket((s) => s.error);
-  const error = module === 2 ? err2 : err1;
-  useEffect(() => { if (module === 2) usePocket.getState().start(); }, [module]);
+  const err3 = useChatter((s) => s.error);
+  const error = pick(module, err1, err2, err3);
+  useEffect(() => { if (module === 2) usePocket.getState().start(); if (module === 3) useChatter.getState().start(); }, [module]);
   useEffect(() => {
-    try { if (location.hash === '#module-2') setModule(2); } catch { /* sandboxed */ }
+    try { const m = /#module-([123])/.exec(location.hash); if (m) setModule(Number(m[1]) as ModuleId); } catch { /* sandboxed */ }
   }, [setModule]);
   const [modal, setModal] = useState<null | 'model' | 'assume' | 'refs' | 'modules'>(null);
   const [rightTab, setRightTab] = useState<'results' | 'guide'>('results');

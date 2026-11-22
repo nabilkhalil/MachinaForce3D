@@ -3,7 +3,7 @@ import { DEFAULT_PARAMS, type ProcessParams, type SimResult, type SimSummary } f
 import { runSimulation, latestRequestId } from '../sim/client';
 
 export type Stage = 'observe' | 'experiment' | 'solve' | 'validate';
-export type ModuleId = 1 | 2;
+export type ModuleId = 1 | 2 | 3;
 export type ColorMode = 'displacement' | 'thickness';
 export type ForceOn = 'tool' | 'workpiece';
 
@@ -126,7 +126,7 @@ export const useApp = create<AppState>((set, get) => {
       playback.playing = false;
       playback.station = 0;
       set({ module: m, playing: false, cursor: { station: 0, phi: playback.phi } });
-      try { history.replaceState(null, '', m === 2 ? '#module-2' : '#module-1'); } catch { /* sandboxed */ }
+      try { history.replaceState(null, '', `#module-${m}`); } catch { /* sandboxed */ }
     },
     params: { ...DEFAULT_PARAMS, coeffs: { ...DEFAULT_PARAMS.coeffs } },
     result: null,

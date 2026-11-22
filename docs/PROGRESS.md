@@ -1,5 +1,23 @@
 # Progress log
 
+## Milestone 3 — 2026-11-22: Module 3, chatter and dynamic instability ✅
+
+Delivered
+- `src/physics/chatter.ts` — a dynamic model separate from the static Modules 1–2: one mode per direction (fn, ζ, k), receptance and dynamic stiffness, average directional factors, zero-order-approximation stability lobes, exact-discretisation time-domain simulation of regenerative milling with tooth jump-out and surface memory (multiple regeneration), chatter detection by once-per-tooth sampling and spectrum (never by force level), forced-vibration response from force harmonics × FRF, time-domain stability boundary by bisection, tap-test peak-picking fit.
+- 3D: block side milling in the vise; tool motion, rotation and vibration from the simulation; machined face coloured by vibration (chatter marks).
+- Panels: modal editor (symmetric/asymmetric, import from Module 2), verdict banner, two-method stability comparison, vibration, dynamic stiffness, productivity; charts: stability lobes with time-domain boundary, measured cuts and operating point (click to set speed), FRF with tooth harmonics, vibration vs time with once-per-tooth samples, spectrum, trials; CSV exports.
+- Learning: Module 3 Stage A/B/C, chatter production problem (verified chattering baseline, verified solvable), scoring, report; Validate: tap-test FRF fit and measured cutting tests on the lobe diagram.
+- 20 new tests (88 total).
+
+Findings and fixes during development
+- 4 teeth at half immersion: one tooth enters exactly as another exits; sampling the force at step boundaries counted the entry spike on alternate teeth only, a spurious period-2 force that looked like chatter. Forces are now evaluated at step midpoints.
+- Without surface memory, deep unstable cuts diverged (teeth "dig in" without limit). Tracking the last-cut surface per angular position (multiple regeneration) bounds chatter at realistic amplitudes (≈ 0.05–0.8 mm p-p).
+- Lobe curves must be joined in chatter-frequency order per eigen-branch; sorting points by speed joins unrelated branches.
+- ZOA agrees with the time-domain boundary within ≈ 5–25 % at ae/D = 0.25–1 and is optimistic by 2–4× at ae/D ≈ 0.1 (missing period-doubling lobes) — used as a teaching point and flagged in the app.
+
+Not yet done (Module 3)
+- Semi-discretisation or multi-frequency lobes for low immersion; process damping; variable pitch/helix; speed-dependent spindle dynamics; workpiece-side modes (thin walls); sound-based chatter detection from uploaded audio.
+
 ## Milestone 2 — 2026-11-22: Module 2, tool bending in deep-pocket machining ✅
 
 Delivered
