@@ -3,7 +3,7 @@ import { DEFAULT_PARAMS, type ProcessParams, type SimResult, type SimSummary } f
 import { runSimulation, latestRequestId } from '../sim/client';
 
 export type Stage = 'observe' | 'experiment' | 'solve' | 'validate';
-export type ModuleId = 1 | 2 | 3;
+export type ModuleId = 1 | 2 | 3 | 4;
 export type ColorMode = 'displacement' | 'thickness';
 export type ForceOn = 'tool' | 'workpiece';
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.0 — 22 November 2026
+- **Module 4: Cutting-force components in CNC turning of slender shafts.** Fc/Ff/Fp with a nose-radius equivalent edge, beam FE shaft with chuck / tailstock / centres / steady rest, diameter-error profile, power, torque and theoretical roughness, lathe scene in the ISO lathe frame, Stage A/B/C content, production problem, dynamometer and micrometer validation, worksheet.
+- 109 verification tests.
+
 ## v0.3.0 — 22 November 2026
 - **Module 3: Chatter and dynamic instability.** Separate dynamic model: tool modes, FRF and dynamic stiffness, ZOA stability lobes cross-checked by a time-domain regenerative simulation (tooth jump-out, multiple regeneration), forced vibration vs chatter by once-per-tooth sampling and spectrum, chatter-mark visualisation, tap-test fitting and measured cuts on the lobe diagram, Stage A/B/C content, production problem and worksheet.
 - 88 verification tests.

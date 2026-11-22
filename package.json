@@ -1,6 +1,6 @@
 {
   "name": "machinaforce-3d",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "description": "MachinaForce 3D: Interactive CNC cutting force learning laboratory",

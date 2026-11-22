@@ -13,15 +13,20 @@ import { ResultsPanel3 } from './ui/m3/ResultsPanel3';
 import { BottomPanel3 } from './ui/m3/BottomPanel3';
 import { useChatter } from './state/chatterStore';
 import { CHATTER_ASSUMPTIONS } from './content/chatter';
+import { ParamPanel4 } from './ui/m4/ParamPanel4';
+import { ResultsPanel4 } from './ui/m4/ResultsPanel4';
+import { BottomPanel4 } from './ui/m4/BottomPanel4';
+import { useTurning } from './state/turningStore';
+import { TURNING_ASSUMPTIONS } from './content/turning';
 import { useEffect } from 'react';
 import { StagePanel } from './ui/StagePanel';
 import { Btn, Modal, Tag, Toggle } from './ui/controls';
 import { useApp, type ModuleId, type Stage, type ViewState } from './state/store';
 
-const pick = <T,>(m: number, a: T, b: T, c: T) => (m === 3 ? c : m === 2 ? b : a);
-const ParamPanel = () => pick(useApp((s) => s.module), <ParamPanel1 />, <ParamPanel2 />, <ParamPanel3 />);
-const ResultsPanel = () => pick(useApp((s) => s.module), <ResultsPanel1 />, <ResultsPanel2 />, <ResultsPanel3 />);
-const BottomPanel = () => pick(useApp((s) => s.module), <BottomPanel1 />, <BottomPanel2 />, <BottomPanel3 />);
+const pick = <T,>(m: number, a: T, b: T, c: T, d: T) => (m === 4 ? d : m === 3 ? c : m === 2 ? b : a);
+const ParamPanel = () => pick(useApp((s) => s.module), <ParamPanel1 />, <ParamPanel2 />, <ParamPanel3 />, <ParamPanel4 />);
+const ResultsPanel = () => pick(useApp((s) => s.module), <ResultsPanel1 />, <ResultsPanel2 />, <ResultsPanel3 />, <ResultsPanel4 />);
+const BottomPanel = () => pick(useApp((s) => s.module), <BottomPanel1 />, <BottomPanel2 />, <BottomPanel3 />, <BottomPanel4 />);
 import { ASSUMPTIONS, MODULES, REFERENCES } from './content/learning';
 import { FORCE_COLORS } from './scene/Forces';
 
@@ -54,6 +59,7 @@ function ViewToolbar() {
           {module === 1 && <Toggle label="Undeformed ghost" checked={v.showGhost} onChange={t('showGhost')} />}
           {module === 2 && <p className="text-[10px] leading-snug text-slate-500">Exaggeration applies to tool bending and to the wall offset. Wall colour = deviation from nominal.</p>}
           {module === 3 && <p className="text-[10px] leading-snug text-slate-500">Exaggeration applies to the simulated tool vibration. Machined-face colour = vibration amplitude (chatter marks).</p>}
+          {module === 4 && <p className="text-[10px] leading-snug text-slate-500">Lathe frame: Z = spindle axis, X toward the tool (rear turret), Y up. Exaggeration applies to the shaft centre-line deflection. Shaft colour = diameter deviation.</p>}
           <div className={`flex items-center gap-1 text-[11px] ${module !== 1 ? 'hidden' : ''}`}>
             <span className="text-slate-400">Colour</span>
             {([['displacement', 'displacement'], ['thickness', 'thickness dev.']] as const).map(([k, l]) => (
@@ -76,6 +82,14 @@ function ViewToolbar() {
 }
 
 function Legend() {
+  const module = useApp((s) => s.module);
+  if (module === 4)
+    return (
+      <div className="pointer-events-none absolute bottom-2 right-2 z-10 hidden rounded bg-slate-950/80 px-2 py-1 text-[10px] text-slate-300 ring-1 ring-slate-700 md:block">
+        <span style={{ color: FORCE_COLORS.Fx }}>■ Fp (X, passive)</span> <span style={{ color: FORCE_COLORS.Fy }}>■ Fc (−Y, cutting)</span> <span style={{ color: FORCE_COLORS.Fz }}>■ Ff (Z, feed)</span>{' '}
+        <span style={{ color: FORCE_COLORS.F }}>■ |F|</span> · dark stripe = spindle rotation
+      </div>
+    );
   return (
     <div className="pointer-events-none absolute bottom-2 right-2 z-10 hidden rounded md:block bg-slate-950/80 px-2 py-1 text-[10px] text-slate-300 ring-1 ring-slate-700">
       <span style={{ color: FORCE_COLORS.Fx }}>■ Fx</span> <span style={{ color: FORCE_COLORS.Fy }}>■ Fy</span> <span style={{ color: FORCE_COLORS.Fz }}>■ Fz</span>{' '}
@@ -139,6 +153,15 @@ Slotting, y-flexible only:  a_lim,min = 8 k ζ (1+ζ) / (N Krc)
 Pockets:  f_tp ≈ fn/(k+1)   →   n ≈ 60 fn / (N (k+1))
 Chatter test (time domain): once-per-tooth samples scatter > 10 % of motion rms; dominant frequency not a tooth harmonic`}</pre>
         </section>
+        <section>
+          <h3 className="font-semibold text-cyan-300">Module 4 — turning (lathe frame: Z spindle axis, X radial toward the tool)</h3>
+          <pre className="whitespace-pre-wrap rounded bg-slate-950 p-2 text-[12px] text-slate-200">{`Equivalent edge (nose radius rε, entering angle κr) → κe;   h = f sin κe,   b = ap / sin κe   (b·h = ap·f)
+Fc = Ktc·b·h + Kte·b          FN = Krc·b·h + Kre·b          Ff = FN sin κe          Fp = FN cos κe
+On the tool: Fc → −Y,  Ff opposes the feed motion (±Z),  Fp → +X;  the workpiece receives the opposite forces
+n = 1000 vc / (π D)     Pc = Fc · vc / 60 000 [kW]     M = Fc · D/2     Q = vc · ap · f [cm³/min]     Ra ≈ f² / (32 rε)
+Shaft: beam FE with chuck (kT, kR), tailstock / centres (k), steady rest (k);  closed forms: PL³/3EI, PL³/48EI
+Generated diameter:  d = d_target + 2e,   e = (C_shaft(z) + 1/k_tool) · Fp(ap − e)`}</pre>
+        </section>
       </div>
     </Modal>
   );
@@ -152,7 +175,7 @@ function AssumptionsModal({ onClose }: { onClose: () => void }) {
         <Tag kind="validated">calibrated</Tag><span className="text-slate-400">coefficients you confirmed from your own tests (validation still requires comparison with measurements)</span>
         <Tag kind="assumption">assumption</Tag><span className="text-slate-400">modelling idealisation</span>
       </div>
-      {[...ASSUMPTIONS, ...POCKET_ASSUMPTIONS, ...CHATTER_ASSUMPTIONS].map((g) => (
+      {[...ASSUMPTIONS, ...POCKET_ASSUMPTIONS, ...CHATTER_ASSUMPTIONS, ...TURNING_ASSUMPTIONS].map((g) => (
         <div key={g.title} className="mb-3">
           <h3 className="font-semibold text-cyan-300">{g.title}</h3>
           <ul className="ml-5 list-disc space-y-0.5 text-[13px] text-slate-300">{g.items.map((i) => <li key={i}>{i}</li>)}</ul>
@@ -212,14 +235,20 @@ export default function App() {
   const reset1 = useApp((s) => s.resetParams);
   const reset2 = usePocket((s) => s.resetParams);
   const reset3 = useChatter((s) => s.resetParams);
-  const reset = pick(module, reset1, reset2, reset3);
+  const reset4 = useTurning((s) => s.resetParams);
+  const reset = pick(module, reset1, reset2, reset3, reset4);
   const err1 = useApp((s) => s.error);
   const err2 = usePocket((s) => s.error);
   const err3 = useChatter((s) => s.error);
-  const error = pick(module, err1, err2, err3);
-  useEffect(() => { if (module === 2) usePocket.getState().start(); if (module === 3) useChatter.getState().start(); }, [module]);
+  const err4 = useTurning((s) => s.error);
+  const error = pick(module, err1, err2, err3, err4);
   useEffect(() => {
-    try { const m = /#module-([123])/.exec(location.hash); if (m) setModule(Number(m[1]) as ModuleId); } catch { /* sandboxed */ }
+    if (module === 2) usePocket.getState().start();
+    if (module === 3) useChatter.getState().start();
+    if (module === 4) useTurning.getState().start();
+  }, [module]);
+  useEffect(() => {
+    try { const m = /#module-([1234])/.exec(location.hash); if (m) setModule(Number(m[1]) as ModuleId); } catch { /* sandboxed */ }
   }, [setModule]);
   const [modal, setModal] = useState<null | 'model' | 'assume' | 'refs' | 'modules'>(null);
   const [rightTab, setRightTab] = useState<'results' | 'guide'>('results');

@@ -29,7 +29,7 @@ export function BottomPanel3() {
   return (
     <div className="flex h-full flex-col">
       <PlaybackBar n={n} passCount={1} passIndex={0} firstStationOf={() => 0} x={0}
-        label={`t = ${tMs.toFixed(2)} ms · tooth ${Math.floor(i / r.sim.stepsPerTooth) + 1}`} />
+        label={`t = ${tMs.toFixed(2)} ms · tooth ${Math.floor(i / r.sim.stepsPerTooth) + 1}`} note="Slow motion of the simulated vibration (time-domain model)." />
       <div className="flex gap-1 overflow-x-auto border-b border-slate-800 px-2 pt-1">
         {tabs.map((t) => (
           <button key={t.id} onClick={() => setTab(t.id)} className={`whitespace-nowrap rounded-t px-2.5 py-1 text-[11px] ${tab === t.id ? 'bg-slate-800 text-cyan-300' : 'text-slate-400 hover:text-slate-200'}`}>{t.label}</button>

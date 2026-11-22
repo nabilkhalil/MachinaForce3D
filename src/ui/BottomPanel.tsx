@@ -14,8 +14,8 @@ export const axisStyle = { fontSize: 10, fill: '#94a3b8' };
 export const tip = { contentStyle: { background: '#0f172a', border: '1px solid #334155', fontSize: 11 }, labelStyle: { color: '#cbd5e1' } };
 
 /** Module-agnostic playback bar. */
-export function PlaybackBar({ n, passCount, passIndex, firstStationOf, x, label }: {
-  n: number; passCount: number; passIndex: number; firstStationOf: (p: number) => number; x: number; label?: string;
+export function PlaybackBar({ n, passCount, passIndex, firstStationOf, x, label, note }: {
+  n: number; passCount: number; passIndex: number; firstStationOf: (p: number) => number; x: number; label?: string; note?: string;
 }) {
   const cursor = useApp((s) => s.cursor);
   const playing = useApp((s) => s.playing);
@@ -40,13 +40,13 @@ export function PlaybackBar({ n, passCount, passIndex, firstStationOf, x, label 
           {[0.25, 0.5, 1, 2, 4, 8].map((v) => <option key={v} value={v}>{v}×</option>)}
         </select>
       </label>
-      {label === undefined && <label className="flex items-center gap-1 text-[11px] text-slate-400" title="Cutter angle of tooth 0 (amber flute)">
+      {(label === undefined || note === undefined) && <label className="flex items-center gap-1 text-[11px] text-slate-400" title="Cutter / spindle angle">
         φ
         <input type="range" min={0} max={359} step={1} value={Math.round((cursor.phi * 180) / Math.PI)}
           onChange={(e) => { setPlaying(false); playback.phi = (Number(e.target.value) * Math.PI) / 180; setCursor(playback.station, playback.phi); }}
           className="w-24" aria-label="Cutter angle" />
       </label>}
-      <span className="text-[10px] text-slate-500">{label === undefined ? 'Visual time is slowed; physics is quasi-static.' : 'Slow motion of the simulated vibration (time-domain model).'}</span>
+      <span className="text-[10px] text-slate-500">{note ?? 'Visual time is slowed; physics is quasi-static.'}</span>
     </div>
   );
 }

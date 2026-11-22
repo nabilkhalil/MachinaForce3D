@@ -3,12 +3,13 @@ import type { PocketParams, PocketResult } from '../physics/pocketProcess';
 import { simulate } from '../physics/process';
 import { simulatePocket } from '../physics/pocketProcess';
 import { analyseChatter, timeDomainBoundary, type ChatterParams, type ChatterResult } from '../physics/chatter';
+import { simulateTurning, type TurningParams, type TurnResult } from '../physics/turning';
 import SimWorker from './worker?worker&inline';
 
-type Kind = 'thinwall' | 'pocket' | 'chatter' | 'chatterBoundary';
+type Kind = 'thinwall' | 'pocket' | 'chatter' | 'chatterBoundary' | 'turning';
 let worker: Worker | null = null;
 let seq = 0;
-const latest: Record<Kind, number> = { thinwall: 0, pocket: 0, chatter: 0, chatterBoundary: 0 };
+const latest: Record<Kind, number> = { thinwall: 0, pocket: 0, chatter: 0, chatterBoundary: 0, turning: 0 };
 const pending = new Map<number, { resolve: (r: { result: unknown; ms: number }) => void; reject: (e: unknown) => void }>();
 
 function getWorker(): Worker | null {
@@ -56,6 +57,9 @@ export function runChatter(params: ChatterParams) {
 }
 export function runChatterBoundary(params: ChatterParams) {
   return run<{ rpm: number; a: number }[]>('chatterBoundary', params, () => timeDomainBoundary(params, 40, 12, 8, 200));
+}
+export function runTurning(params: TurningParams) {
+  return run<TurnResult>('turning', params, () => simulateTurning(params));
 }
 export function latestRequestId(kind: Kind = 'thinwall') {
   return latest[kind];

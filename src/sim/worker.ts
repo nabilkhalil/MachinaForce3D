@@ -2,12 +2,14 @@
 import { simulate, type ProcessParams } from '../physics/process';
 import { simulatePocket, type PocketParams } from '../physics/pocketProcess';
 import { analyseChatter, timeDomainBoundary, type ChatterParams } from '../physics/chatter';
+import { simulateTurning, type TurningParams } from '../physics/turning';
 
 type Msg =
   | { id: number; kind: 'thinwall'; params: ProcessParams }
   | { id: number; kind: 'pocket'; params: PocketParams }
   | { id: number; kind: 'chatter'; params: ChatterParams }
-  | { id: number; kind: 'chatterBoundary'; params: ChatterParams };
+  | { id: number; kind: 'chatterBoundary'; params: ChatterParams }
+  | { id: number; kind: 'turning'; params: TurningParams };
 
 self.onmessage = (ev: MessageEvent<Msg>) => {
   const m = ev.data;
@@ -17,6 +19,7 @@ self.onmessage = (ev: MessageEvent<Msg>) => {
       m.kind === 'pocket' ? simulatePocket(m.params)
       : m.kind === 'chatter' ? analyseChatter(m.params)
       : m.kind === 'chatterBoundary' ? timeDomainBoundary(m.params, 40, 12, 8, 200)
+      : m.kind === 'turning' ? simulateTurning(m.params)
       : simulate(m.params);
     (self as unknown as Worker).postMessage({ id: m.id, result, ms: performance.now() - t0 });
   } catch (err) {

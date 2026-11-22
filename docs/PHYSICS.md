@@ -152,3 +152,28 @@ Peak picking on the measured receptance: fn at the minimum of Im G, ζ from the 
 
 ## Validity
 ZOA is reliable at moderate to high radial immersion and optimistic at low immersion; the time-domain result is the reference there. Not modelled: process damping, speed-dependent spindle dynamics, runout, variable pitch/helix, workpiece modes.
+
+
+---
+
+# Module 4 — Cutting-force components in turning slender shafts
+
+File: `turning.ts`.
+
+## Frame
+ISO lathe frame: Z along the spindle axis from the chuck face, X radial toward the tool (programmed as a diameter), Y completing the right-handed set (the surface passes the tool in −Y). The scene maps lathe (x, y, z) → three.js (z, y, −x), i.e. the tool sits behind the shaft as on a rear-turret CNC lathe. Forces are reported on the tool: Fc → −Y, Ff opposes the feed motion, Fp → +X.
+
+## Force model
+Equivalent straight edge: the chord from the bottom of the nose to the point where the edge (nose arc t ∈ [0, κr], then the straight edge at κr) leaves the uncut surface at depth ap gives κe. Then h = f sin κe, b = ap / sin κe, Fc = Ktc b h + Kte b, FN = Krc b h + Kre b, Ff = FN sin κe, Fp = FN cos κe. For a sharp tool κe = κr; with ap < rε(1 − cos κr) the cut is entirely on the nose and κe is independent of κr. Milling-derived coefficients are used as illustrative turning coefficients.
+
+## Shaft
+Euler–Bernoulli beam elements (2 DOF/node, default 60), element diameter = mean of the current stock over the element; rebuilt at each tool position. Supports: chuck = translational + rotational springs (or rigid), head/tail centre or live centre = translational spring (rotation free), steady rest = translational spring at the nearest node. Point load via Hermite shape functions; deflection sampled with the same functions. First bending frequency by Rayleigh's method with the self-weight shape.
+
+## Diameter generation
+e = (C_shaft(z) + 1/k_tool)·Fp(ap − e) solved by bisection on [0, ap]; generated diameter d = d_target + 2e (never larger than the current stock). The Y deflection from Fc is reported with its radius effect δy²/(2r).
+
+## Productivity and finish
+n = 1000 vc/(π d0) (constant spindle speed), vf = f·n, Pc = Fc·vc/60 000, M = Fc·d0/2, Q = vc·ap·f, Ra ≈ f²/(32 rε), Rz ≈ f²/(8 rε).
+
+## Limits
+Quasi-static (no whirling or chatter; see Module 3 for dynamics), linear support springs, no thermal growth, no tool wear, no chip-flow-dependent Fc direction, kinematic roughness only.

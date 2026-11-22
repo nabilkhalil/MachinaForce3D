@@ -21,14 +21,15 @@ MachinaForce 3D lets you **see** cutting forces. You set up a milling operation 
 3. [Module 1 — Thin-wall milling: step by step](#module-1--thin-wall-milling-step-by-step)
 4. [Module 2 — Tool bending in a deep pocket: step by step](#module-2--tool-bending-in-a-deep-pocket-step-by-step)
 5. [Module 3 — Chatter: step by step](#module-3--chatter-step-by-step)
-6. [The three learning stages and your score](#the-three-learning-stages-and-your-score)
-7. [Reading the results correctly](#reading-the-results-correctly)
-8. [Key equations](#key-equations)
-9. [Tips, common mistakes and FAQ](#tips-common-mistakes-and-faq)
-10. [Panduan ringkas (Bahasa Melayu)](#panduan-ringkas-bahasa-melayu)
-11. [For lecturers](#for-lecturers)
-12. [For developers](#for-developers)
-13. [References](#references)
+6. [Module 4 — Turning a slender shaft: step by step](#module-4--turning-a-slender-shaft-step-by-step)
+7. [The three learning stages and your score](#the-three-learning-stages-and-your-score)
+8. [Reading the results correctly](#reading-the-results-correctly)
+9. [Key equations](#key-equations)
+10. [Tips, common mistakes and FAQ](#tips-common-mistakes-and-faq)
+11. [Panduan ringkas (Bahasa Melayu)](#panduan-ringkas-bahasa-melayu)
+12. [For lecturers](#for-lecturers)
+13. [For developers](#for-developers)
+14. [References](#references)
 
 ---
 
@@ -118,6 +119,21 @@ The same X/Y/Z frame is used in the 3D view, the graphs, the equations and the C
 
 ---
 
+## Module 4 — Turning a slender shaft: step by step
+
+**The problem.** A long, thin shaft (Ø25 → Ø24 mm, 300 mm, L/D ≈ 12) is finish-turned on a CNC lathe. The cutting force has three components. The **passive force Fp** pushes the shaft away from the tool, so the diameter comes out too large, most of all where the shaft is least supported.
+
+![Module 4 — turning a slender shaft](docs/images/module4-turning.png)
+
+1. **Select Module 4.** The view switches to a lathe. Here the axes follow the **lathe convention**: **Z** is the spindle axis (from the chuck face), **X** is radial toward the tool (CNC programs X as a diameter), and Y is up.
+2. **Press Play** and read the three arrows on the tool: **Fc** (green, −Y, cutting) is the largest and sets the power; **Ff** (blue, Z) is the feed force; **Fp** (red, +X) is the passive force that bends the shaft.
+3. **Open "Diameter error profile".** Between the chuck and the tailstock the error is barrel-shaped. **Shaft deflection (now)** shows why: the bent shape under the force at the current tool position.
+4. **Change the workholding.** Try *Chuck only*, then *Chuck + tailstock*, then add a **steady rest**. The error changes by more than an order of magnitude.
+5. **Open "Forces vs depth of cut".** At small depths the cut lies on the tool's nose radius, so the entering angle κr has almost no effect and Fp is large. Try nose radius 0.4 vs 0.8 mm and watch the accuracy–roughness trade-off (Ra ≈ f²/32rε).
+6. **Validate (lab):** upload a 3-component dynamometer record (Fc, Ff, Fp) and micrometer readings along the shaft.
+
+---
+
 ## The three learning stages and your score
 
 | Stage | What you do | Points |
@@ -131,7 +147,7 @@ The same X/Y/Z frame is used in the 3D view, the graphs, the equations and the C
 - Your justification is checked automatically only for length and key concepts. **Your lecturer grades the reasoning.**
 - **Report** downloads an HTML report with your score, configuration, answers and trials, plus a CSV of your trials.
 
-Lab worksheets: [Module 1 worksheet](docs/WORKSHEET.md) · [Module 2 worksheet](docs/WORKSHEET_M2.md) · [Module 3 worksheet](docs/WORKSHEET_M3.md)
+Lab worksheets: [Module 1](docs/WORKSHEET.md) · [Module 2](docs/WORKSHEET_M2.md) · [Module 3](docs/WORKSHEET_M3.md) · [Module 4](docs/WORKSHEET_M4.md)
 
 ---
 
@@ -161,6 +177,9 @@ Lab worksheets: [Module 1 worksheet](docs/WORKSHEET.md) · [Module 2 worksheet](
 | Tool receptance (Module 3) | G(f) = 1 / (k (1 − r² + 2iζr)), r = f/fn |
 | Stability pockets | n ≈ 60 · fn / (N (k + 1)), k = 0, 1, 2 … |
 | Minimum stable depth (slotting, one flexible direction) | a_lim,min = 8 k ζ (1 + ζ) / (N · Krc) |
+| Turning forces (Module 4) | Fc = Ktc·b·h + Kte·b, FN = Krc·b·h + Kre·b, Ff = FN sin κe, Fp = FN cos κe; h = f sin κe, b = ap / sin κe |
+| Turning power, speed, MRR | Pc = Fc·vc / 60 000 (kW), n = 1000·vc / (π D), Q = vc·ap·f (cm³/min) |
+| Theoretical roughness | Ra ≈ f² / (32 rε) |
 
 Open **Equations** in the app for the full model and the sign convention.
 
@@ -174,7 +193,7 @@ Open **Equations** in the app for the full model and the sign convention.
 - **Lost your settings?** *Reset* restores the baseline. Saved trials stay until you press *Clear*.
 - **Are my answers sent anywhere?** No. Everything stays in your browser. Use *Report* to hand in your work.
 - **Can I use my own cutting coefficients?** Yes: *Cutting-force coefficients* in the left panel. Tick "calibrated" only if they come from your own dynamometer tests.
-- **Why are Modules 4–6 greyed out?** They are planned and not yet available. The app never presents an unfinished module as working.
+- **Why are Modules 5–6 greyed out?** They are planned and not yet available. The app never presents an unfinished module as working.
 - **The lobes and the time-domain dots disagree?** Near the boundary and at low radial immersion this is expected. Trust the time-domain verdict and treat the point as marginal.
 
 ---
@@ -182,7 +201,7 @@ Open **Equations** in the app for the full model and the sign convention.
 ## Panduan ringkas (Bahasa Melayu)
 
 1. Buka aplikasi: <https://nabilkhalil.github.io/MachinaForce3D/> (Chrome/Edge/Firefox, komputer riba disyorkan).
-2. Pilih **Module 1** (dinding nipis), **Module 2** (lenturan mata alat dalam poket dalam) atau **Module 3** (getaran *chatter*) di bahagian atas kiri.
+2. Pilih modul di bahagian atas kiri: **Module 1** (dinding nipis), **Module 2** (lenturan mata alat dalam poket dalam), **Module 3** (getaran *chatter*) atau **Module 4** (pelarikan aci langsing).
 3. Tekan **▶ Play**. Anak panah **hijau (Fy)** ialah daya yang menolak dinding dan mata alat menjauhi satu sama lain.
 4. Tandakan **Learning overlay** untuk penerangan setiap parameter.
 5. Ikut **Lab guide**: **A · Observe → B · Experiment → C · Solve**. Ramal dahulu, kemudian ubah **satu** parameter sahaja dan simpan setiap percubaan (*Save current as trial*).
@@ -194,11 +213,12 @@ Nota: nilai daya dan pesongan ialah **anggaran model** (pekali pemotongan ilustr
 
 ## For lecturers
 
-- **Modules:** 1 Thin-wall milling ✅ · 2 Tool bending in deep pockets ✅ · 3 Chatter and dynamic instability ✅ · 4 Turning slender shafts · 5 Fixture stiffness · 6 Tool wear (planned)
+- **Modules:** 1 Thin-wall milling ✅ · 2 Tool bending in deep pockets ✅ · 3 Chatter and dynamic instability ✅ · 4 Turning slender shafts ✅ · 5 Fixture stiffness · 6 Tool wear (planned)
+- **Dynamometer link (Module 4):** compare 3-component turning forces (`Fc_N, Ff_N, Fp_N`) and micrometer readings (`z_mm, diameter_mm`) with the model.
 - **Tap-test link (Module 3):** students can fit fn, ζ, k from an impact-hammer FRF (`freq_hz, real, imag` in m/N) and plot their cutting tests (`rpm, ap_mm, chatter`) on the lobe diagram.
 - **Lab link:** the *Validate* stage compares the model with a measured force signal (`angle_deg` or `time_s`, `FX_N`, `FY_N`, `FZ_N`) and with measured wall thickness (Module 1) or wall deviation (Module 2). It reports RMSE and percentage error. *Synthetic example* buttons generate clearly labelled practice files.
 - **Offline / LMS:** `npm run build:single` produces one self-contained HTML file that can be uploaded to URLearn or opened without internet.
-- **Verification:** 88 automated tests compare the numerical models with analytical solutions (closed-form mean forces, cantilever and stepped-beam deflections, natural frequencies, mesh convergence, volume conservation, closed-form stability limits, and analytical lobes cross-checked against an independent time-domain simulation). See [docs/VALIDATION.md](docs/VALIDATION.md). Verification shows the equations are solved correctly; validation against your own measurements is still required before quoting absolute values.
+- **Verification:** 109 automated tests compare the numerical models with analytical solutions (closed-form mean forces, cantilever and stepped-beam deflections, natural frequencies, mesh convergence, volume conservation, closed-form stability limits, and analytical lobes cross-checked against an independent time-domain simulation). See [docs/VALIDATION.md](docs/VALIDATION.md). Verification shows the equations are solved correctly; validation against your own measurements is still required before quoting absolute values.
 - **Documentation:** [docs/PHYSICS.md](docs/PHYSICS.md) (models, sign convention, assumptions) · [docs/PROGRESS.md](docs/PROGRESS.md) (milestones, limitations).
 
 ---
@@ -208,7 +228,7 @@ Nota: nilai daya dan pesongan ialah **anggaran model** (pekali pemotongan ilustr
 ```bash
 npm ci
 npm run dev          # http://localhost:5173
-npm test             # 88 verification tests (Vitest)
+npm test             # 109 verification tests (Vitest)
 npm run build        # production build → dist/
 npm run build:single # one self-contained HTML file → dist-single/index.html
 ```

@@ -1,6 +1,6 @@
 # Verification record
 
-Run with `npm test`. Last run: 2026-11-22, **88 / 88 passed** (Module 1: 47, Module 2: 21, Module 3: 20)
+Run with `npm test`. Last run: 2026-11-22, **109 / 109 passed** (Module 1: 47, Module 2: 21, Module 3: 20, Module 4: 21)
 
 Verification shows that the equations are implemented and solved correctly against
 analytical benchmarks. It does **not** validate the cutting coefficients or the physical
@@ -28,6 +28,11 @@ measured forces and measured wall thickness (see the in-app *Validate* stage).
 | **M3** ZOA lobes, slotting, y-flexible | a_lim,min = 8kζ(1+ζ)/(N·Krc) | ≤ 2 % |
 | **M3** ZOA vs independent time-domain simulation | stable at 0.6·a_ZOA, chatter at 1.5·a_ZOA (ae/D = 0.25, 0.5, 1; several speeds) | all points |
 | **M3** Tap-test peak picking | recovers fn, ζ, k of a synthetic FRF | ≤ 3 % |
+| **M4** Force decomposition | sharp tool: κe = κr, Ff = FN sin κr, Fp = FN cos κr, b·h = ap·f | exact |
+| **M4** Shaft beam FE | cantilever PL³/3EI; simply supported PL³/48EI; propped cantilever Pa³b²(3L+b)/(12EIL³) | ≤ 0.1 % |
+| **M4** Shaft natural frequency | cantilever (1.875²/2π)√(EI/ρAL⁴) | ≤ 2 % |
+| **M4** Deflection coupling | sharp tool: e = c·g·ap/(1 + c·g) | ≤ 1e-6 |
+| **M4** Power, roughness | Pc = Fc·vc/60 000, Ra = f²/(32 rε) | exact |
 
 ## Test list
 
@@ -119,3 +124,24 @@ measured forces and measured wall thickness (see the in-app *Validate* stage).
 - Deep-pocket process > full-depth pass with short flutes is flagged
 - Module 2 production problem > the baseline programme fails
 - Module 2 production problem > an admissible solution exists
+- Turning force components > sharp tool (rε = 0): κe = κr, Ff = FN sin κr, Fp = FN cos κr, chip area b·h = ap·f
+- Turning force components > Fc = Ktc·ap·f + Kte·b (units N)
+- Turning force components > κr = 90°, sharp tool: no passive force; with a nose radius Fp > 0
+- Turning force components > nose radius: small depth → small equivalent angle; deep cut → κe approaches κr
+- Turning force components > cutting power Pc = Fc·vc/60 000 and theoretical Ra = f²/(32 rε)
+- Shaft beam FE vs closed-form solutions > cantilever (chuck only), load at the free end: δ = PL³/(3EI)
+- Shaft beam FE vs closed-form solutions > between rigid centres, load at mid-span: δ = PL³/(48EI)
+- Shaft beam FE vs closed-form solutions > chuck + rigid tailstock (propped cantilever), load at a: δ(a) = P a² b³ (3L + b)... closed form
+- Shaft beam FE vs closed-form solutions > steady rest reduces mid-span deflection; compliant tailstock increases it
+- Shaft beam FE vs closed-form solutions > mesh convergence for a load between nodes
+- Shaft beam FE vs closed-form solutions > first natural frequency of a cantilever ≈ (1.875²/2π)·√(EI/ρAL⁴) within 2 %
+- Turning process > volume conservation and exact replay of the stock edits
+- Turning process > coupling: with a sharp tool e = c·g·ap/(1 + c·g) exactly
+- Turning process > deflection leaves the diameter oversize but never more than the stock
+- Turning process > workholding ranking: chuck only ≫ centres > chuck + tailstock > with steady rest
+- Turning process > between supports the error profile is barrel-shaped (larger in the span than at both ends)
+- Turning process > T-B2 holds: κr 93° vs 75° makes no difference when the cut is on the nose
+- Turning process > T-B3 holds: smaller nose radius → smaller Fp and error, larger Ra
+- Turning process > spring pass and rough–finish reduce the error
+- Module 4 production problem > the baseline fails
+- Module 4 production problem > an admissible solution exists

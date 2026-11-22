@@ -182,7 +182,7 @@ export const MODULES: ModuleInfo[] = [
   { id: 1, title: 'Thin-wall deflection in aerospace blade milling', status: 'operational', note: 'Quasi-static mechanistic force + plate FE + stock removal.' },
   { id: 2, title: 'Tool bending in deep-pocket machining (long overhang)', status: 'operational', note: 'Stepped-cantilever tool with neck and holder/spindle compliance, rigid deep pocket, step-down / spring pass / compensation strategies.' },
   { id: 3, title: 'Chatter and dynamic instability', status: 'operational', note: 'Separate dynamic model: 2-DOF tool modes, ZOA stability lobes cross-checked by a time-domain regenerative simulation; forced vibration vs chatter; tap-test fitting.' },
-  { id: 4, title: 'Cutting-force components in turning slender shafts', status: 'planned', note: 'Not yet implemented.' },
+  { id: 4, title: 'Cutting-force components in turning slender shafts', status: 'operational', note: 'Fc/Ff/Fp with nose-radius equivalent edge, beam FE shaft with chuck/tailstock/centres/steady rest, diameter-error profile, power and roughness.' },
   { id: 5, title: 'Workpiece movement and fixture stiffness', status: 'planned', note: 'Base clamp compliance is available in Module 1; full fixture model not yet implemented.' },
   { id: 6, title: 'Tool wear and rising cutting forces in difficult alloys', status: 'planned', note: 'Not yet implemented.' },
 ];

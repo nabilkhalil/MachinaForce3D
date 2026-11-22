@@ -71,19 +71,25 @@ function Arrow({ api, color, radius = 0.7 }: { api: ReturnType<typeof useArrow>;
 
 export const FORCE_COLORS = { Fx: '#ef4444', Fy: '#22c55e', Fz: '#3b82f6', F: '#f59e0b', Ft: '#fb923c', Fr: '#c084fc' };
 
-export function Forces({ getView = module1ForceView }: { getView?: () => ForceView | null }) {
+export function Forces({ getView = module1ForceView, enabled = true }: { getView?: () => ForceView | null; enabled?: boolean }) {
   const view = useApp((s) => s.view);
   const ax = useArrow(), ay = useArrow(), az = useArrow(), ar = useArrow();
   const teethT = [useArrow(), useArrow(), useArrow(), useArrow(), useArrow(), useArrow()];
   const teethR = [useArrow(), useArrow(), useArrow(), useArrow(), useArrow(), useArrow()];
   const label = useRef<THREE.Group>(null);
   const contactMark = useRef<THREE.Mesh>(null);
-  const [txt, setTxt] = useState({ Fx: 0, Fy: 0, Fz: 0, F: 0 });
+  const [txt, setTxt] = useState({ Fx: 0, Fy: 0, Fz: 0, F: 0, on: true });
+  const zero = new THREE.Vector3();
   const tick = useRef(0);
 
   useFrame((_, dt) => {
-    const s = getView();
-    if (!s) return;
+    const s = enabled ? getView() : null;
+    if (!s) {
+      for (const a of [ax, ay, az, ar, ...teethT, ...teethR]) a.set(zero, zero);
+      if (contactMark.current) contactMark.current.visible = false;
+      if (txt.on) setTxt({ ...txt, on: false });
+      return;
+    }
     const sign = view.forceOn === 'tool' ? 1 : -1;
     const k = view.forceScale;
     const o = new THREE.Vector3(...s.contact);
@@ -117,7 +123,7 @@ export function Forces({ getView = module1ForceView }: { getView?: () => ForceVi
     tick.current += dt;
     if (tick.current > 0.12) {
       tick.current = 0;
-      setTxt({ Fx: F.x, Fy: F.y, Fz: F.z, F: Math.hypot(F.x, F.y, F.z) });
+      setTxt({ Fx: F.x, Fy: F.y, Fz: F.z, F: Math.hypot(F.x, F.y, F.z), on: true });
     }
   });
 
@@ -135,7 +141,7 @@ export function Forces({ getView = module1ForceView }: { getView?: () => ForceVi
       {teethR.map((a, j) => <Arrow key={'r' + j} api={a} color={FORCE_COLORS.Fr} radius={0.45} />)}
       {/* kept mounted (hidden when off): unmounting an updating Html portal throws in React 19 */}
       <group ref={label}>
-        <Html center style={{ pointerEvents: 'none', display: view.showForces ? 'block' : 'none' }} zIndexRange={[10, 0]}>
+        <Html center style={{ pointerEvents: 'none', display: view.showForces && txt.on ? 'block' : 'none' }} zIndexRange={[10, 0]}>
           <div className="whitespace-nowrap rounded bg-slate-900/85 px-2 py-1 text-[10px] leading-tight text-slate-100 shadow ring-1 ring-slate-600 tabular-nums">
               <div className="font-semibold text-amber-300">|F| {txt.F.toFixed(1)} N <span className="font-normal text-slate-400">on {view.forceOn}</span></div>
               <div><span className="text-red-400">Fx</span> {txt.Fx.toFixed(1)} · <span className="text-green-400">Fy</span> {txt.Fy.toFixed(1)} · <span className="text-blue-400">Fz</span> {txt.Fz.toFixed(1)}</div>

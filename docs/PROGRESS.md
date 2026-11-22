@@ -1,5 +1,19 @@
 # Progress log
 
+## Milestone 4 — 2026-11-22: Module 4, cutting-force components in turning slender shafts ✅
+
+Delivered
+- `src/physics/turning.ts`: ISO force components Fc/Ff/Fp with a nose-radius equivalent edge (κe from the chord of the engaged nose + edge, h = f sin κe, b = ap/sin κe), cutting power, torque, MRR, theoretical Ra/Rz; Euler–Bernoulli beam FE of the shaft rebuilt at every tool position from the current diameter profile; chuck (translation + tilt), tailstock / centres and steady rest as springs; tool/turret compliance; force–deflection coupling for the generated diameter; strategies single / spring pass / rough + finish; feed direction; shaft first natural frequency; slenderness, power and nose-radius warnings.
+- Lathe scene in its own ISO lathe frame (Z spindle axis, X toward the rear turret, Y up): headstock, rotating chuck or head centre with driving dog, shaft rebuilt from the diameter profile and bent by the computed deflection, tailstock, steady rest, carriage and insert; force arrows Fp/Fc/Ff on the tool or workpiece.
+- Panels: shaft, workholding, tool, cutting; results (components with shares, power/torque, deflections incl. the second-order effect of Fc, diameter tolerance, Ra, shaft f₁); charts (components along Z, diameter error profile, shaft deflected shape, forces and κe vs depth of cut, trials); CSV exports.
+- Learning: Module 4 Stage A/B/C, slender-shaft production problem (verified failing baseline, verified solvable), scoring, report; Validate: 3-component dynamometer means and micrometer diameters.
+- 21 new tests (109 total).
+
+Findings
+- With ap = 0.5 mm and rε = 0.8 mm the whole cut lies on the nose: the equivalent entering angle is ≈ 34° whatever κr is, so Fp ≈ 0.45·Fc — the entering angle only matters for deeper cuts.
+- Chuck only (L/D ≈ 12) gives ≈ 0.39 mm diameter error vs ≈ 0.023 mm with a tailstock and ≈ 0.013 mm with a mid-span steady rest; a spring pass removes almost all of the remaining error at double the cutting time.
+- Fc is ≈ 2× Fp but its tangential deflection (≈ 19 µm) changes the radius by only ≈ 0.015 µm.
+
 ## Milestone 3 — 2026-11-22: Module 3, chatter and dynamic instability ✅
 
 Delivered

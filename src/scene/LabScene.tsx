@@ -12,6 +12,8 @@ import { usePocket } from '../state/pocketStore';
 import { PocketWall, BentTool, PocketDims, pocketForceView } from './m2/PocketScene';
 import { ChatterScene, chatterForceView } from './m3/ChatterScene';
 import { useChatter } from '../state/chatterStore';
+import { useTurning } from '../state/turningStore';
+import { LatheScene } from './m4/LatheScene';
 
 function Env() {
   const { gl, scene } = useThree();
@@ -30,7 +32,8 @@ function PlaybackDriver() {
   const r1 = useApp((s) => s.result);
   const r2 = usePocket((s) => s.result);
   const r3 = useChatter((s) => s.result);
-  const nStations = module === 3 ? (r3 ? r3.sim.x.length : 0) : module === 2 ? (r2 ? r2.stations.length : 0) : r1 ? r1.stations.length : 0;
+  const r4 = useTurning((s) => s.result);
+  const nStations = module === 4 ? (r4 ? r4.stations.length : 0) : module === 3 ? (r3 ? r3.sim.x.length : 0) : module === 2 ? (r2 ? r2.stations.length : 0) : r1 ? r1.stations.length : 0;
   const rate = module === 3 ? (r3 ? r3.sim.stepsPerTooth * 2 : 128) : 4; // module 3: 2 tooth periods per second at 1×
   const result = nStations > 0 ? { stations: { length: nStations } } : null;
   const setCursor = useApp((s) => s.setCursor);
@@ -56,8 +59,8 @@ function PlaybackDriver() {
   return null;
 }
 
-function AxisTriad({ at }: { at: [number, number, number] }) {
-  const L = 14;
+export function AxisTriad({ at, visible = true, size = 14 }: { at: [number, number, number]; visible?: boolean; size?: number }) {
+  const L = size;
   const axes: { d: [number, number, number]; c: string; l: string }[] = [
     { d: [L, 0, 0], c: '#ef4444', l: 'X' },
     { d: [0, L, 0], c: '#22c55e', l: 'Y' },
@@ -67,8 +70,8 @@ function AxisTriad({ at }: { at: [number, number, number] }) {
     <group position={at}>
       {axes.map((a) => (
         <group key={a.l}>
-          <Line points={[[0, 0, 0], a.d]} color={a.c} lineWidth={3} />
-          <Html position={a.d.map((v) => v * 1.15) as [number, number, number]} center style={{ pointerEvents: 'none' }}>
+          <Line points={[[0, 0, 0], a.d]} color={a.c} lineWidth={3} visible={visible} />
+          <Html position={a.d.map((v) => v * 1.15) as [number, number, number]} center style={{ pointerEvents: 'none', display: visible ? 'block' : 'none' }}>
             <span className="text-xs font-bold" style={{ color: a.c }}>{a.l}</span>
           </Html>
         </group>
@@ -117,6 +120,7 @@ function CameraRig() {
   const H1 = useApp((s) => s.params.wallHeight);
   const L2 = usePocket((s) => s.params.wallLength);
   const H2 = usePocket((s) => s.params.pocketDepth);
+  const L4 = useTurning((s) => s.params.L);
   const L = module === 3 ? 80 : module === 2 ? L2 : L1, H = module === 3 ? 20 : module === 2 ? H2 : H1;
   const preset = useApp((s) => s.view.camPreset);
   const nonce = useApp((s) => s.view.camNonce);
@@ -127,11 +131,23 @@ function CameraRig() {
     const d: Record<string, [number, number, number]> = {
       iso: [100, 65, 125], front: [0, 5, 165], top: [0, 170, 1], side: [170, 10, 0], machine: [900, 600, 1500],
     };
+    if (module === 4) {
+      // lathe: spindle axis along world X (lathe Z), shaft centre at (L/2, 0, 0)
+      const t4 = new THREE.Vector3(L4 / 2, 0, 0);
+      const d4: Record<string, [number, number, number]> = {
+        iso: [90, 210, 470], front: [0, 20, 560], top: [0, 600, 1], side: [560, 80, 0], machine: [300, 650, 1300],
+      };
+      const o = d4[preset] ?? d4.iso;
+      controls.target.copy(t4);
+      camera.position.set(t4.x + o[0], t4.y + o[1], t4.z + o[2]);
+      controls.update();
+      return;
+    }
     const off = d[preset] ?? d.iso;
     controls.target.copy(preset === 'machine' ? new THREE.Vector3(0, 150, -200) : t);
     camera.position.set(t.x + off[0], t.y + off[1], t.z + off[2]);
     controls.update();
-  }, [controls, camera, L, H, preset, nonce, module]);
+  }, [controls, camera, L, H, L4, preset, nonce, module]);
   return null;
 }
 
@@ -156,8 +172,8 @@ export function LabScene() {
       <CameraRig />
       {/* Machine frame: Z up. three.js is Y-up, so rotate −90° about X: (x, y, z) → (x, z, −y). */}
       <group rotation={[-Math.PI / 2, 0, 0]}>
-        {showMachine && <Machine />}
-        {module === 1 ? (
+        {showMachine && module !== 4 && <Machine />}
+        {module === 4 ? null : module === 1 ? (
           <>
             <Fixture />
             <WallMesh />
@@ -177,8 +193,13 @@ export function LabScene() {
         <Dimensions />
         <PocketDims />
         {/* shared across modules so their Html labels are never unmounted */}
-        <Forces getView={module === 3 ? chatterForceView : module === 2 ? pocketForceView : module1ForceView} />
-        <AxisTriad at={[-24, -26, 0]} />
+        <Forces getView={module === 3 ? chatterForceView : module === 2 ? pocketForceView : module1ForceView} enabled={module !== 4} />
+        <AxisTriad at={[-24, -26, 0]} visible={module !== 4} />
+      </group>
+      {/* Lathe frame (Module 4): lathe (x, y, z) → three (z, y, −x): spindle axis along world X,
+          the tool on the far side of the shaft (rear-turret convention, +X away from the operator). */}
+      <group rotation={[0, Math.PI / 2, 0]}>
+        <LatheScene />
       </group>
       <gridHelper args={[4000, 40, '#1e3a5f', '#14243a']} position={[25, -715, 0]} />
     </Canvas>
