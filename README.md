@@ -12,6 +12,20 @@ MachinaForce 3D lets you **see** cutting forces. You set up a milling operation 
 
 ![MachinaForce 3D — Module 1, thin-wall milling](docs/images/module1-overview.png)
 
+### The seven modules — open one directly
+
+| # | Module | What you learn | Open |
+|---|---|---|---|
+| 1 | Thin-wall milling | Wall deflection, surface error, machining strategy | [▶ Module 1](https://nabilkhalil.github.io/MachinaForce3D/#module-1) |
+| 2 | Tool bending in a deep pocket | Tool and holder deflection, compensation | [▶ Module 2](https://nabilkhalil.github.io/MachinaForce3D/#module-2) |
+| 3 | Chatter | Stability lobes, regenerative vibration, tap test | [▶ Module 3](https://nabilkhalil.github.io/MachinaForce3D/#module-3) |
+| 4 | Turning a slender shaft | Shaft deflection, tailstock and steady rest, diameter error | [▶ Module 4](https://nabilkhalil.github.io/MachinaForce3D/#module-4) |
+| 5 | Fixture stiffness and workpiece movement | 3-2-1 locating, clamping force, slip and lift-off | [▶ Module 5](https://nabilkhalil.github.io/MachinaForce3D/#module-5) |
+| 6 | Tool wear and cutting force | Flank wear VB, force and power growth, tool replacement | [▶ Module 6](https://nabilkhalil.github.io/MachinaForce3D/#module-6) |
+| 7 | Thin-floor pocket milling | Floor bending, springback, thickness error, underside support | [▶ Module 7](https://nabilkhalil.github.io/MachinaForce3D/#module-7) |
+
+![MachinaForce 3D — Module 7, thin-floor pocket milling](docs/images/module7-thinfloor.png)
+
 ---
 
 ## Contents
@@ -24,14 +38,15 @@ MachinaForce 3D lets you **see** cutting forces. You set up a milling operation 
 6. [Module 4 — Turning a slender shaft: step by step](#module-4--turning-a-slender-shaft-step-by-step)
 7. [Module 5 — Fixture stiffness and workpiece movement: step by step](#module-5--fixture-stiffness-and-workpiece-movement-step-by-step)
 8. [Module 6 — Tool wear and cutting force: step by step](#module-6--tool-wear-and-cutting-force-step-by-step)
-9. [The three learning stages and your score](#the-three-learning-stages-and-your-score)
-10. [Reading the results correctly](#reading-the-results-correctly)
-11. [Key equations](#key-equations)
-12. [Tips, common mistakes and FAQ](#tips-common-mistakes-and-faq)
-13. [Panduan ringkas (Bahasa Melayu)](#panduan-ringkas-bahasa-melayu)
-14. [For lecturers](#for-lecturers)
-15. [For developers](#for-developers)
-16. [References](#references)
+9. [Module 7 — Thin-floor pocket milling: step by step](#module-7--thin-floor-pocket-milling-step-by-step)
+10. [The three learning stages and your score](#the-three-learning-stages-and-your-score)
+11. [Reading the results correctly](#reading-the-results-correctly)
+12. [Key equations](#key-equations)
+13. [Tips, common mistakes and FAQ](#tips-common-mistakes-and-faq)
+14. [Panduan ringkas (Bahasa Melayu)](#panduan-ringkas-bahasa-melayu)
+15. [For lecturers](#for-lecturers)
+16. [For developers](#for-developers)
+17. [References](#references)
 
 ---
 
@@ -168,6 +183,23 @@ The same X/Y/Z frame is used in the 3D view, the graphs, the equations and the C
 
 ---
 
+## Module 7 — Thin-floor pocket milling: step by step
+
+**The problem.** An Al 7075-T651 part has an 80 × 60 mm pocket whose floor must finish at 1.50 ± 0.05 mm. During floor finishing the axial cutting force pushes the thin floor away from the cutter; the floor is cut while deflected and springs back afterwards, so it ends up **too thick where it is most flexible**.
+
+**Model.** The floor is a Mindlin plate (the Module 1 element) in the X–Y plane with bending rigidity D = E t³ / [12(1 − ν²)]; its thickness follows the remaining stock. Edges: stiff walls (clamped) or reduced edge support; optional underside pins or an elastic support bed. The axial load is the Module 1 side-flute force plus an end-cutting-edge term, applied (as −F_tool) over the cutter footprint at the real tool position of a zigzag, spiral or adaptive-style path. The final thickness is t_final + min over passes of (tool bottom + local deflection).
+
+1. **Select Module 7** and press Play. Set *Forces on* → **workpiece**: the axial force points down into the floor.
+2. Watch the floor bend under the cutter (exaggerated; dashed cyan grid = undeformed floor). Use **Isometric**, **Top** and **Section y = W/2** in *View & display*.
+3. Open **Deflection vs position** and **Thickness deviation map**: the error is largest in the middle of the span, not near the walls.
+4. **Experiment:** change floor thickness, pocket size, fz and underside support; save each run as a trial. **Deflection vs floor thickness** shows w ∝ 1/t³; **Strategy comparison** runs all three tool paths.
+5. **Solve (Stage C):** bring the floor within ±0.05 mm in ≤ 40 s of cutting, save ≥ 3 trials and justify the choice.
+6. **Validate:** upload `x_mm, y_mm, measured_thickness_mm` (ultrasonic gauge or CMM) to get MAE, RMSE and maximum error against the simulated floor.
+
+**Student activity (20 min).** Predict the thickness error for (a) the default set-up, (b) a 1 mm floor, (c) a centre support pin. Run each, save it as a trial, and explain the differences with D ∝ t³ and the effective span.
+
+---
+
 ## The three learning stages and your score
 
 | Stage | What you do | Points |
@@ -216,6 +248,7 @@ Lab worksheets: [Module 1](docs/WORKSHEET.md) · [Module 2](docs/WORKSHEET_M2.md
 | Theoretical roughness | Ra ≈ f² / (32 rε) |
 | Rigid-body motion (Module 5) | u(p) = δ + θ × (p − c); K q = W, K = Σ k Jᵀ J, J = [n, (p − c) × n] |
 | Contact conditions (Module 5) | N = N0 − k (u · n) ≥ 0 (else lift-off); \|T\| ≤ μ N (else slip); k = k_ref (N0 / 1 kN)^(1/3) |
+| Thin floor (Module 7) | D = E t³ / [12(1 − ν²)]; workpiece load −Fz over the cutter footprint; thickness = t_final + min(z_b + w) |
 | Tool wear (Module 6) | Kte(VB) = Kte0 + ate·VB, Kre(VB) = Kre0 + are·VB, Kae(VB) = Kae0 + aae·VB; P = T·ω, u = P / MRR |
 | Wear growth (Module 6, illustrative) | dVB/dt = A·(vc/vref)^p·(fz/fref)^q; parts per tool = floor(t_crit / t_part) |
 | Feature error (Module 5) | e = −u(cutting point) in the datum frame; clamping safety factor = 1 / (minimum clamp multiplier) |
@@ -240,7 +273,7 @@ Open **Equations** in the app for the full model and the sign convention.
 ## Panduan ringkas (Bahasa Melayu)
 
 1. Buka aplikasi: <https://nabilkhalil.github.io/MachinaForce3D/> (Chrome/Edge/Firefox, komputer riba disyorkan).
-2. Pilih modul di bahagian atas kiri: **Module 1** (dinding nipis), **Module 2** (lenturan mata alat dalam poket dalam), **Module 3** (getaran *chatter*), **Module 4** (pelarikan aci langsing), **Module 5** (kekukuhan lekapan dan pergerakan bahan kerja) atau **Module 6** (kehausan mata alat dan daya pemotongan).
+2. Pilih modul di bahagian atas kiri: **Module 1** (dinding nipis), **Module 2** (lenturan mata alat dalam poket dalam), **Module 3** (getaran *chatter*), **Module 4** (pelarikan aci langsing), **Module 5** (kekukuhan lekapan dan pergerakan bahan kerja), **Module 6** (kehausan mata alat dan daya pemotongan) atau **Module 7** (pemesinan lantai poket nipis).
 3. Tekan **▶ Play**. Anak panah **hijau (Fy)** ialah daya yang menolak dinding dan mata alat menjauhi satu sama lain.
 4. Tandakan **Learning overlay** untuk penerangan setiap parameter.
 5. Ikut **Lab guide**: **A · Observe → B · Experiment → C · Solve**. Ramal dahulu, kemudian ubah **satu** parameter sahaja dan simpan setiap percubaan (*Save current as trial*).
@@ -252,14 +285,15 @@ Nota: nilai daya dan pesongan ialah **anggaran model** (pekali pemotongan ilustr
 
 ## For lecturers
 
-- **Modules:** 1 Thin-wall milling ✅ · 2 Tool bending in deep pockets ✅ · 3 Chatter and dynamic instability ✅ · 4 Turning slender shafts ✅ · 5 Fixture stiffness and workpiece movement ✅ · 6 Tool wear and cutting force ✅
+- **Modules:** 1 Thin-wall milling ✅ · 2 Tool bending in deep pockets ✅ · 3 Chatter and dynamic instability ✅ · 4 Turning slender shafts ✅ · 5 Fixture stiffness and workpiece movement ✅ · 6 Tool wear and cutting force ✅ · 7 Thin-floor pocket milling ✅
+- **Thin-floor lab link (Module 7):** ultrasonic or CMM floor thickness (`x_mm, y_mm, measured_thickness_mm`) is compared point by point with the simulated floor (MAE, RMSE, max error).
 - **Tool-wear lab link (Module 6):** mean forces at several measured VB values (`VB_mm, Fx_N, Fy_N, Fz_N`) give fitted wear coefficients; tool-microscope readings (`time_min, VB_mm`) give the wear rate.
 - **Fixture lab link (Module 5):** a static push test on the clamped part (`x_mm, y_mm, z_mm, Fx_N, Fy_N, Fz_N, disp_um`) checks the contact stiffness; CMM slot readings (`x_mm, eY_mm, eZ_mm`) check the predicted feature errors.
 - **Dynamometer link (Module 4):** compare 3-component turning forces (`Fc_N, Ff_N, Fp_N`) and micrometer readings (`z_mm, diameter_mm`) with the model.
 - **Tap-test link (Module 3):** students can fit fn, ζ, k from an impact-hammer FRF (`freq_hz, real, imag` in m/N) and plot their cutting tests (`rpm, ap_mm, chatter`) on the lobe diagram.
 - **Lab link:** the *Validate* stage compares the model with a measured force signal (`angle_deg` or `time_s`, `FX_N`, `FY_N`, `FZ_N`) and with measured wall thickness (Module 1) or wall deviation (Module 2). It reports RMSE and percentage error. *Synthetic example* buttons generate clearly labelled practice files.
 - **Offline / LMS:** `npm run build:single` produces one self-contained HTML file that can be uploaded to URLearn or opened without internet.
-- **Verification:** 146 automated tests compare the numerical models with analytical solutions (closed-form mean forces, cantilever and stepped-beam deflections, natural frequencies, mesh convergence, volume conservation, closed-form stability limits, rigid-body equilibrium of the fixture, friction and lift-off logic, and analytical lobes cross-checked against an independent time-domain simulation). See [docs/VALIDATION.md](docs/VALIDATION.md). Verification shows the equations are solved correctly; validation against your own measurements is still required before quoting absolute values.
+- **Verification:** 166 automated tests compare the numerical models with analytical solutions (closed-form mean forces, cantilever and stepped-beam deflections, natural frequencies, mesh convergence, volume conservation, closed-form stability limits, rigid-body equilibrium of the fixture, friction and lift-off logic, and analytical lobes cross-checked against an independent time-domain simulation). See [docs/VALIDATION.md](docs/VALIDATION.md). Verification shows the equations are solved correctly; validation against your own measurements is still required before quoting absolute values.
 - **Documentation:** [docs/PHYSICS.md](docs/PHYSICS.md) (models, sign convention, assumptions) · [docs/PROGRESS.md](docs/PROGRESS.md) (milestones, limitations).
 
 ---
@@ -269,7 +303,7 @@ Nota: nilai daya dan pesongan ialah **anggaran model** (pekali pemotongan ilustr
 ```bash
 npm ci
 npm run dev          # http://localhost:5173
-npm test             # 146 verification tests (Vitest)
+npm test             # 166 verification tests (Vitest)
 npm run build        # production build → dist/
 npm run build:single # one self-contained HTML file → dist-single/index.html
 ```

@@ -29,15 +29,20 @@ import { BottomPanel6 } from './ui/m6/BottomPanel6';
 import { useToolWear } from './state/toolWearStore';
 import { TOOLWEAR_ASSUMPTIONS } from './content/toolWear';
 import { EdgeCloseUp } from './scene/m6/ToolWearScene';
+import { ParamPanel7 } from './ui/m7/ParamPanel7';
+import { ResultsPanel7 } from './ui/m7/ResultsPanel7';
+import { BottomPanel7 } from './ui/m7/BottomPanel7';
+import { useThinFloor } from './state/thinFloorStore';
+import { THINFLOOR_ASSUMPTIONS } from './content/thinFloor';
 import { useEffect } from 'react';
 import { StagePanel } from './ui/StagePanel';
 import { Btn, Modal, Tag, Toggle } from './ui/controls';
 import { useApp, type ModuleId, type Stage, type ViewState } from './state/store';
 
-const pick = <T,>(m: number, a: T, b: T, c: T, d: T, e: T, f: T) => (m === 6 ? f : m === 5 ? e : m === 4 ? d : m === 3 ? c : m === 2 ? b : a);
-const ParamPanel = () => pick(useApp((s) => s.module), <ParamPanel1 />, <ParamPanel2 />, <ParamPanel3 />, <ParamPanel4 />, <ParamPanel5 />, <ParamPanel6 />);
-const ResultsPanel = () => pick(useApp((s) => s.module), <ResultsPanel1 />, <ResultsPanel2 />, <ResultsPanel3 />, <ResultsPanel4 />, <ResultsPanel5 />, <ResultsPanel6 />);
-const BottomPanel = () => pick(useApp((s) => s.module), <BottomPanel1 />, <BottomPanel2 />, <BottomPanel3 />, <BottomPanel4 />, <BottomPanel5 />, <BottomPanel6 />);
+const pick = <T,>(m: number, a: T, b: T, c: T, d: T, e: T, f: T, g: T) => (m === 7 ? g : m === 6 ? f : m === 5 ? e : m === 4 ? d : m === 3 ? c : m === 2 ? b : a);
+const ParamPanel = () => pick(useApp((s) => s.module), <ParamPanel1 />, <ParamPanel2 />, <ParamPanel3 />, <ParamPanel4 />, <ParamPanel5 />, <ParamPanel6 />, <ParamPanel7 />);
+const ResultsPanel = () => pick(useApp((s) => s.module), <ResultsPanel1 />, <ResultsPanel2 />, <ResultsPanel3 />, <ResultsPanel4 />, <ResultsPanel5 />, <ResultsPanel6 />, <ResultsPanel7 />);
+const BottomPanel = () => pick(useApp((s) => s.module), <BottomPanel1 />, <BottomPanel2 />, <BottomPanel3 />, <BottomPanel4 />, <BottomPanel5 />, <BottomPanel6 />, <BottomPanel7 />);
 import { ASSUMPTIONS, MODULES, REFERENCES } from './content/learning';
 import { FORCE_COLORS } from './scene/Forces';
 
@@ -65,11 +70,12 @@ function ViewToolbar() {
           </label>
           <label className="block text-[11px] text-slate-400">
             Deformation ×{v.exaggeration} {v.exaggeration > 1 && <span className="text-amber-300">(exaggerated)</span>}
-            <input type="range" min={1} max={module === 5 ? 2000 : 100} step={1} value={v.exaggeration} onChange={(e) => setView({ exaggeration: Number(e.target.value) })} className="w-full" />
+            <input type="range" min={1} max={module === 5 ? 2000 : module === 7 ? 1000 : 100} step={1} value={v.exaggeration} onChange={(e) => setView({ exaggeration: Number(e.target.value) })} className="w-full" />
           </label>
           {module === 1 && <Toggle label="Undeformed ghost" checked={v.showGhost} onChange={t('showGhost')} />}
           {module === 2 && <p className="text-[10px] leading-snug text-slate-500">Exaggeration applies to tool bending and to the wall offset. Wall colour = deviation from nominal.</p>}
           {module === 3 && <p className="text-[10px] leading-snug text-slate-500">Exaggeration applies to the simulated tool vibration. Machined-face colour = vibration amplitude (chatter marks).</p>}
+          {module === 7 && <p className="text-[10px] leading-snug text-slate-500">Floor deflection drawn × exaggeration; dashed cyan = undeformed nominal floor. Section and colour mode: left panel → View & display.</p>}
           {module === 6 && <p className="text-[10px] leading-snug text-slate-500">Wear land on every flute drawn ×6 wider than VB; see the edge close-up (bottom left). Arrows follow the worn-tool force.</p>}
           {module === 5 && <p className="text-[10px] leading-snug text-slate-500">Exaggeration applies to the rigid-body motion of the block on its contacts (µm-scale). Pads: green stick, amber slip, red lift-off. Slot floor colour = |error| / tolerance.</p>}
           {module === 4 && <p className="text-[10px] leading-snug text-slate-500">Lathe frame: Z = spindle axis, X toward the tool (rear turret), Y up. Exaggeration applies to the shaft centre-line deflection. Shaft colour = diameter deviation.</p>}
@@ -197,6 +203,16 @@ Illustrative wear rate:  dVB/dt = A·(vc/vref)^p·(fz/fref)^q   →  VB(t) = VB0
 Time to criterion = (VBc − VB0)/rate;  parts per tool = floor(t_crit / t_part);  tools = ⌈batch / parts per tool⌉
 Criteria (ISO 8688-2 tool-life tests): VB = 0.3 mm uniform, VBmax = 0.5 mm localized`}</pre>
         </section>
+        <section>
+          <h3 className="font-semibold text-cyan-300">Module 7 — thin floor (Mindlin plate in X–Y, Z up)</h3>
+          <pre className="whitespace-pre-wrap rounded bg-slate-950 p-2 text-[12px] text-slate-200">{`Bending rigidity  D = E t³ / [12(1 − ν²)];  Q4 Mindlin elements, t(x, y) = t_final + remaining stock
+Edges: w = 0 (hard support); clamped walls β = 0, or reduced support k_rot = 2 D / W per unit length
+Underside: pins k_pin at nodes, or elastic bed k_bed·w per unit area
+Axial tool force: Fz = Fz,side(ap_eff) + Σ_engaged (K_zc fz sinφ + K_ze)·R ;  workpiece load −Fz over the cutter footprint
+Coupling: δ = c·Fz,  ap_eff = stock − δ  ⇒  δ = c(a·stock + e)/(1 + c·a)
+Surface generation: top(x, y) = min over passes [z_b + w(x, y)];  thickness = t_final + top (springback)
+Benchmark: simply supported square, uniform q:  w_max = 0.00406 q a⁴ / D`}</pre>
+        </section>
       </div>
     </Modal>
   );
@@ -210,7 +226,7 @@ function AssumptionsModal({ onClose }: { onClose: () => void }) {
         <Tag kind="validated">calibrated</Tag><span className="text-slate-400">coefficients you confirmed from your own tests (validation still requires comparison with measurements)</span>
         <Tag kind="assumption">assumption</Tag><span className="text-slate-400">modelling idealisation</span>
       </div>
-      {[...ASSUMPTIONS, ...POCKET_ASSUMPTIONS, ...CHATTER_ASSUMPTIONS, ...TURNING_ASSUMPTIONS, ...FIXTURE_ASSUMPTIONS, ...TOOLWEAR_ASSUMPTIONS].map((g) => (
+      {[...ASSUMPTIONS, ...POCKET_ASSUMPTIONS, ...CHATTER_ASSUMPTIONS, ...TURNING_ASSUMPTIONS, ...FIXTURE_ASSUMPTIONS, ...TOOLWEAR_ASSUMPTIONS, ...THINFLOOR_ASSUMPTIONS].map((g) => (
         <div key={g.title} className="mb-3">
           <h3 className="font-semibold text-cyan-300">{g.title}</h3>
           <ul className="ml-5 list-disc space-y-0.5 text-[13px] text-slate-300">{g.items.map((i) => <li key={i}>{i}</li>)}</ul>
@@ -273,23 +289,26 @@ export default function App() {
   const reset4 = useTurning((s) => s.resetParams);
   const reset5 = useFixture((s) => s.resetParams);
   const reset6 = useToolWear((s) => s.resetParams);
-  const reset = pick(module, reset1, reset2, reset3, reset4, reset5, reset6);
+  const reset7 = useThinFloor((s) => s.resetParams);
+  const reset = pick(module, reset1, reset2, reset3, reset4, reset5, reset6, reset7);
   const err1 = useApp((s) => s.error);
   const err2 = usePocket((s) => s.error);
   const err3 = useChatter((s) => s.error);
   const err4 = useTurning((s) => s.error);
   const err5 = useFixture((s) => s.error);
   const err6 = useToolWear((s) => s.error);
-  const error = pick(module, err1, err2, err3, err4, err5, err6);
+  const err7 = useThinFloor((s) => s.error);
+  const error = pick(module, err1, err2, err3, err4, err5, err6, err7);
   useEffect(() => {
     if (module === 2) usePocket.getState().start();
     if (module === 3) useChatter.getState().start();
     if (module === 4) useTurning.getState().start();
     if (module === 5) useFixture.getState().start();
     if (module === 6) useToolWear.getState().start();
+    if (module === 7) useThinFloor.getState().start();
   }, [module]);
   useEffect(() => {
-    try { const m = /#module-([1-6])/.exec(location.hash); if (m) setModule(Number(m[1]) as ModuleId); } catch { /* sandboxed */ }
+    try { const m = /#module-([1-7])/.exec(location.hash); if (m) setModule(Number(m[1]) as ModuleId); } catch { /* sandboxed */ }
   }, [setModule]);
   const [modal, setModal] = useState<null | 'model' | 'assume' | 'refs' | 'modules'>(null);
   const [rightTab, setRightTab] = useState<'results' | 'guide'>('results');

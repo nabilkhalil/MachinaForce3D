@@ -5,12 +5,13 @@ import { simulatePocket } from '../physics/pocketProcess';
 import { analyseChatter, timeDomainBoundary, type ChatterParams, type ChatterResult } from '../physics/chatter';
 import { simulateTurning, type TurningParams, type TurnResult } from '../physics/turning';
 import { simulateFixture, type FixtureParams, type FixResult } from '../physics/fixture';
+import { compareStrategies, simulateThinFloor, type ThinFloorParams, type ThinFloorResult } from '../physics/thinFloor';
 import SimWorker from './worker?worker&inline';
 
-type Kind = 'thinwall' | 'pocket' | 'chatter' | 'chatterBoundary' | 'turning' | 'fixture';
+type Kind = 'thinwall' | 'pocket' | 'chatter' | 'chatterBoundary' | 'turning' | 'fixture' | 'thinfloor' | 'thinfloorCompare';
 let worker: Worker | null = null;
 let seq = 0;
-const latest: Record<Kind, number> = { thinwall: 0, pocket: 0, chatter: 0, chatterBoundary: 0, turning: 0, fixture: 0 };
+const latest: Record<Kind, number> = { thinwall: 0, pocket: 0, chatter: 0, chatterBoundary: 0, turning: 0, fixture: 0, thinfloor: 0, thinfloorCompare: 0 };
 const pending = new Map<number, { resolve: (r: { result: unknown; ms: number }) => void; reject: (e: unknown) => void }>();
 
 function getWorker(): Worker | null {
@@ -64,6 +65,12 @@ export function runTurning(params: TurningParams) {
 }
 export function runFixture(params: FixtureParams) {
   return run<FixResult>('fixture', params, () => simulateFixture(params));
+}
+export function runThinFloor(params: ThinFloorParams) {
+  return run<ThinFloorResult>('thinfloor', params, () => simulateThinFloor(params));
+}
+export function runThinFloorCompare(params: ThinFloorParams) {
+  return run<ReturnType<typeof compareStrategies>>('thinfloorCompare', params, () => compareStrategies(params));
 }
 export function latestRequestId(kind: Kind = 'thinwall') {
   return latest[kind];

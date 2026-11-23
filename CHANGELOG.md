@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.7.0 — 23 November 2026
+- **Module 7: Cutting force and workpiece distortion in thin-floor pocket milling.** Mindlin floor plate with perimeter and underside supports, zigzag/spiral/adaptive tool paths, axial force with end-edge term, force–deflection coupling, springback surface generation, thickness map, natural frequency, section view, Stage A/B/C, measured-thickness validation.
+- 166 verification tests.
+
 ## v0.6.0 — 23 November 2026
 - **Module 6: Tool wear evolution and cutting force in CNC end milling.** Flank wear VB in the edge coefficients; forces, power and specific energy versus VB; illustrative wear-growth model and tool-replacement plan (ISO 8688-2 VB 0.3 mm criterion, adjustable); cutting-edge close-up; Stage A/B/C content and production problem; force-vs-VB and wear-rate fitting.
 - 146 verification tests.

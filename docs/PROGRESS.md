@@ -1,5 +1,18 @@
 # Progress log
 
+## Milestone 7 — 2026-11-23: Module 7, thin-floor pocket milling ✅
+
+Delivered
+- `src/physics/thinFloor.ts`: floor Mindlin plate (reusing the Module 1 element) with clamped / reduced / simply supported edges and centre pin, 2×2 pins or elastic bed; zigzag, spiral and adaptive-style tool-centre paths with engagement; side-flute + end-edge axial force; closed-form force–deflection coupling; swept-footprint surface generation with springback; stiffness updates as stock is removed; natural frequency; validity flags; thickness study; strategy comparison.
+- Scene: pocket with surrounding walls on parallels, deforming floor (stock removal, exaggerated bending, deflection or final-deviation contour), undeformed reference grid, underside supports, section cut, isometric/top/section views, force arrows.
+- Panels: view/display, workpiece, support, strategy, cutting, coefficients; results; charts (forces and deflection vs position, deviation map, thickness profiles, deflection vs thickness, strategy comparison, trials); CSV exports; Stage A/B/C (3 MCQs each), production problem (≥ 3 trials + justification), report; Validate with MAE/RMSE/max error and a labelled synthetic example.
+- 20 new tests (166 total), including the Timoshenko benchmark and mesh convergence.
+
+Findings (illustrative axial coefficients)
+- Default (reduced edges, no underside support, zigzag): max deflection ≈ 75 µm, floor too thick by ≈ 70 µm mid-span (fails ±50 µm); cutting time ≈ 35 s.
+- A centre pin halves the error (≈ 32 µm) at the same time; 2×2 pins or a support bed ≈ 16–18 µm. Adaptive-style passes ≈ 33 µm but ≈ 3× the cutting time; spiral is worse than zigzag here (more cutting near mid-span).
+
+
 ## Milestone 6 — 2026-11-23: Module 6, tool wear evolution and cutting force ✅
 
 Delivered

@@ -3,7 +3,7 @@ import { DEFAULT_PARAMS, type ProcessParams, type SimResult, type SimSummary } f
 import { runSimulation, latestRequestId } from '../sim/client';
 
 export type Stage = 'observe' | 'experiment' | 'solve' | 'validate';
-export type ModuleId = 1 | 2 | 3 | 4 | 5 | 6;
+export type ModuleId = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export type ColorMode = 'displacement' | 'thickness';
 export type ForceOn = 'tool' | 'workpiece';
 
@@ -127,7 +127,7 @@ export const useApp = create<AppState>((set, get) => {
       playback.station = 0;
       // fixture motion is µm-scale: Module 5 needs a much larger exaggeration than the others
       const ex = get().view.exaggeration;
-      const exaggeration = m === 5 ? (ex <= 100 ? 400 : ex) : Math.min(ex, 100);
+      const exaggeration = m === 5 ? (ex <= 100 ? 400 : ex) : m === 7 ? (ex < 50 ? 100 : Math.min(ex, 1000)) : Math.min(ex, 100);
       const fs = get().view.forceScale;
       const big = (k: number) => k === 5 || k === 6; // ~1 kN forces → shorter arrows
       const forceScale = big(m) ? Math.min(fs, m === 6 ? 0.05 : 0.08) : big(get().module) ? 0.35 : fs;

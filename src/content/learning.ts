@@ -185,6 +185,7 @@ export const MODULES: ModuleInfo[] = [
   { id: 4, title: 'Cutting-force components in turning slender shafts', status: 'operational', note: 'Fc/Ff/Fp with nose-radius equivalent edge, beam FE shaft with chuck/tailstock/centres/steady rest, diameter-error profile, power and roughness.' },
   { id: 5, title: 'Workpiece movement and fixture stiffness', status: 'operational', note: 'Slot milling of a block on a 3-2-1 fixture: rigid-body motion on compliant contacts, lift-off and friction slip, clamping safety factor, locator layout, feed direction and fixture natural frequencies.' },
   { id: 6, title: 'Tool wear evolution and cutting force in end milling', status: 'operational', note: 'Flank wear VB raises the edge (ploughing) force coefficients: forces, power and specific energy versus VB, cutting-edge close-up, illustrative wear-growth model, replacement criterion (ISO 8688-2 VB 0.3 mm) and tool-change planning.' },
+  { id: 7, title: 'Thin-floor pocket milling: cutting force and floor distortion', status: 'operational', note: 'Pocket floor finishing on a thin Al 7075 floor: Mindlin plate with perimeter and underside supports, zigzag / spiral / adaptive tool paths, axial force, floor deflection, surface generation with springback and the final thickness map.' },
 ];
 
 export const ASSUMPTIONS: { title: string; items: string[] }[] = [

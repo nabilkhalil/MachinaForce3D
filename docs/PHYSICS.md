@@ -223,3 +223,32 @@ VB = 0.3 mm uniform and VBmax = 0.5 mm localized flank wear are the criteria com
 ## Limits
 Uniform flank wear; linear growth of edge forces; no crater wear, chipping, built-up edge, edge radius, runout, temperature, coolant or dynamics; wear does not alter the chip geometry; constant wear rate.
 
+
+---
+
+# Module 7 — Cutting force and workpiece distortion in thin-floor pocket milling
+
+File: `thinFloor.ts` (reuses `plateFE.ts` elements and banded Cholesky, `millingForce.ts` forces).
+
+## Plate model
+Floor in the X–Y plane (0 ≤ x ≤ L, 0 ≤ y ≤ W), Z up, final top at z = 0. Reissner–Mindlin Q4 elements (2×2 bending, 1-point shear), nx × ny = 32 × 24 by default, D = E t³ / [12(1 − ν²)]. Element thickness = t_final + mean remaining stock in the element; the stiffness is re-assembled and refactorised every 20 stations.
+
+**Boundary conditions.** All edges w = 0 and tangential rotation = 0 ("hard" support, as in Kirchhoff theory). *Clamped*: normal rotation also fixed (stiff walls). *Reduced*: elastic rotational restraint k_rot = 2·D(t_final)/W per unit length (illustrative). *Simply supported*: normal rotation free (benchmark only). Underside: linear pin springs k_pin at the centre or at the 1/3 points, or a Winkler bed k_bed per unit area.
+
+**Benchmark.** Simply supported square plate under uniform pressure: w_max = 0.00406 q a⁴/D (Timoshenko & Woinowsky-Krieger); the 40 × 40 mesh is within 2 %. Mesh convergence is tested on the clamped plate with a footprint load.
+
+## Load
+Tool force = side-flute mechanistic force (Module 1, closed-form mean over a revolution, 30° helix, linear in the engaged depth b) + end-cutting-edge axial term per engaged tooth (K_zc·fz·sinφ + K_ze)·R (illustrative K_zc = 300 N/mm², K_ze = 8 N/mm for Al 7075). In-plane components are rotated from the feed frame to the machine frame by the path direction. The workpiece receives −F_tool; the axial part, uniformly distributed over the cutter footprint (equivalent contact patch), bends the floor. Membrane (in-plane) loads are neglected.
+
+## Tool paths and engagement
+Tool centre within [R, L − R] × [R, W − R]. Zigzag: passes along X with stepover ae (first pass a full slot; up- and down-milling alternate). Spiral: centre-line slot then counter-clockwise rings (climb). Adaptive-style: one-way climb passes at ae = 0.15 D with chip-thinning feed compensation fz/(2√(r(1 − r))) (≤ 2.5×) and rapid returns. Allowance a_f removed in n = ⌈a_f/ap⌉ ≤ 4 equal layers. Corner fillets (radius R) are excluded from the floor evaluation.
+
+## Coupling and surface generation
+Compliance c at the cutter for the footprint load; Fz = a·b + e (linear) with b = stock − δ ⇒ δ = c(a·stock + e)/(1 + c·a); b ≥ 0 (loss of contact flagged). The cells swept by the cutter bottom between stations are cut to z_b + w(x, y) of that instant; the final top is the minimum over all passes, and the final thickness t_final + top (elastic springback after unloading). Thickness is limited to ≥ 0.05 mm (flagged).
+
+## Outputs and validity
+Mean/peak forces, cutter and maximum deflection per station, final thickness map, max/mean |error|, cutting time (feed moves + rapid returns), MRR, first natural frequency (inverse iteration, lumped mass) at the start and end. Flags: f₁ < 3·f_tp (dynamic amplification), w_max > 0.3 t (large deflection), loss of contact, thickness clipping, illustrative coefficients.
+
+## Limits
+Quasi-static, linear, small deflection; idealised edge and pin supports (pins act in compression and tension); no residual stress, thermal or clamping distortion; no tool deflection, runout, tool wear or machine error; corner engagement changes ignored; end-edge axial coefficients must be calibrated (the deflection scales with them).
+

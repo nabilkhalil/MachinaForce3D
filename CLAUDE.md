@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 Project: MachinaForce3D
-Status: Modules 1–6 implemented.
+Status: Modules 1–7 implemented.
 Stack: React 19, TypeScript, Vite, Three.js, Zustand, Recharts, Vitest.
 
 ## Architecture

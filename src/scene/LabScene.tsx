@@ -18,6 +18,8 @@ import { useFixture } from '../state/fixtureStore';
 import { FixtureScene, fixtureForceView } from './m5/FixtureScene';
 import { useToolWear } from '../state/toolWearStore';
 import { ToolWearLabel, ToolWearScene, toolWearForceView } from './m6/ToolWearScene';
+import { useThinFloor } from '../state/thinFloorStore';
+import { ThinFloorLabels, ThinFloorScene, thinFloorForceView } from './m7/ThinFloorScene';
 
 function Env() {
   const { gl, scene } = useThree();
@@ -39,8 +41,9 @@ function PlaybackDriver() {
   const r4 = useTurning((s) => s.result);
   const r5 = useFixture((s) => s.result);
   const r6 = useToolWear((s) => s.result);
-  const nStations = module === 6 ? (r6 ? r6.timeline.length : 0) : module === 5 ? (r5 ? r5.stations.length : 0) : module === 4 ? (r4 ? r4.stations.length : 0) : module === 3 ? (r3 ? r3.sim.x.length : 0) : module === 2 ? (r2 ? r2.stations.length : 0) : r1 ? r1.stations.length : 0;
-  const rate = module === 3 ? (r3 ? r3.sim.stepsPerTooth * 2 : 128) : 4; // module 3: 2 tooth periods per second at 1×
+  const r7 = useThinFloor((s) => s.result);
+  const nStations = module === 7 ? (r7 ? r7.stations.length : 0) : module === 6 ? (r6 ? r6.timeline.length : 0) : module === 5 ? (r5 ? r5.stations.length : 0) : module === 4 ? (r4 ? r4.stations.length : 0) : module === 3 ? (r3 ? r3.sim.x.length : 0) : module === 2 ? (r2 ? r2.stations.length : 0) : r1 ? r1.stations.length : 0;
+  const rate = module === 3 ? (r3 ? r3.sim.stepsPerTooth * 2 : 128) : module === 7 ? 25 : 4; // module 3: 2 tooth periods per second at 1×
   const result = nStations > 0 ? { stations: { length: nStations } } : null;
   const setCursor = useApp((s) => s.setCursor);
   const setPlaying = useApp((s) => s.setPlaying);
@@ -128,6 +131,7 @@ function CameraRig() {
   const H2 = usePocket((s) => s.params.pocketDepth);
   const L4 = useTurning((s) => s.params.L);
   const fx = useFixture((s) => s.params);
+  const tf = useThinFloor((s) => s.params);
   const L = module === 6 ? 100 : module === 3 ? 80 : module === 2 ? L2 : L1, H = module === 6 || module === 3 ? 20 : module === 2 ? H2 : H1;
   const preset = useApp((s) => s.view.camPreset);
   const nonce = useApp((s) => s.view.camNonce);
@@ -150,6 +154,19 @@ function CameraRig() {
       controls.update();
       return;
     }
+    if (module === 7) {
+      // pocket 0..L × 0..W, floor top at z = 0 → centre in three (L/2, 0, −W/2)
+      const t7 = new THREE.Vector3(tf.L / 2, -2, -tf.W / 2);
+      const s7 = Math.max(tf.L, tf.W) / 80;
+      const d7: Record<string, [number, number, number]> = {
+        iso: [95, 165, 135], front: [0, 4, 120], top: [0, 210, 1], side: [190, 20, 0], machine: [900, 600, 1500],
+      };
+      const o = d7[preset] ?? d7.iso;
+      controls.target.copy(preset === 'machine' ? new THREE.Vector3(0, 150, -200) : t7);
+      camera.position.set(t7.x + o[0] * s7, t7.y + o[1] * s7, t7.z + o[2] * s7);
+      controls.update();
+      return;
+    }
     if (module === 5) {
       // block 0..Lx × 0..Ly × 0..Lz (machine) → centre in three (Lx/2, Lz/2, −Ly/2)
       const t5 = new THREE.Vector3(fx.Lx / 2, fx.Lz / 2, -fx.Ly / 2);
@@ -166,7 +183,7 @@ function CameraRig() {
     controls.target.copy(preset === 'machine' ? new THREE.Vector3(0, 150, -200) : t);
     camera.position.set(t.x + off[0], t.y + off[1], t.z + off[2]);
     controls.update();
-  }, [controls, camera, L, H, L4, fx.Lx, fx.Ly, fx.Lz, preset, nonce, module]);
+  }, [controls, camera, L, H, L4, fx.Lx, fx.Ly, fx.Lz, tf.L, tf.W, preset, nonce, module]);
   return null;
 }
 
@@ -192,7 +209,9 @@ export function LabScene() {
       {/* Machine frame: Z up. three.js is Y-up, so rotate −90° about X: (x, y, z) → (x, z, −y). */}
       <group rotation={[-Math.PI / 2, 0, 0]}>
         {showMachine && module !== 4 && <Machine />}
-        {module === 4 ? null : module === 6 ? (
+        {module === 4 ? null : module === 7 ? (
+          <ThinFloorScene />
+        ) : module === 6 ? (
           <>
             <Fixture />
             <ToolWearScene />
@@ -219,9 +238,10 @@ export function LabScene() {
         <Dimensions />
         <PocketDims />
         <ToolWearLabel />
+        <ThinFloorLabels />
         {/* shared across modules so their Html labels are never unmounted */}
-        <Forces getView={module === 6 ? toolWearForceView : module === 5 ? fixtureForceView : module === 3 ? chatterForceView : module === 2 ? pocketForceView : module1ForceView} enabled={module !== 4} />
-        <AxisTriad at={module === 5 ? [-50, -50, 0] : [-24, -26, 0]} visible={module !== 4} />
+        <Forces getView={module === 7 ? thinFloorForceView : module === 6 ? toolWearForceView : module === 5 ? fixtureForceView : module === 3 ? chatterForceView : module === 2 ? pocketForceView : module1ForceView} enabled={module !== 4} />
+        <AxisTriad at={module === 5 ? [-50, -50, 0] : module === 7 ? [-30, -30, 15] : [-24, -26, 0]} visible={module !== 4} />
       </group>
       {/* Lathe frame (Module 4): lathe (x, y, z) → three (z, y, −x): spindle axis along world X,
           the tool on the far side of the shaft (rear-turret convention, +X away from the operator). */}
