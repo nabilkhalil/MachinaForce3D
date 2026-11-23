@@ -245,6 +245,9 @@ export function FixtureScene() {
           <ZCyl p={[0, 0, (flutes.len + overhang) / 2]} r={R * 0.98} h={overhang - flutes.len} m={{ color: '#8c96a3', metalness: 0.9, roughness: 0.25 }} />
           <ZCyl p={[0, 0, overhang + 12]} r={R + 3} r2={R + 12} h={24} m={{ color: '#5b6573', metalness: 0.8, roughness: 0.3 }} />
           <ZCyl p={[0, 0, overhang + 34]} r={R + 12} h={20} m={{ color: '#5b6573', metalness: 0.8, roughness: 0.3 }} />
+          {/* flange + taper up to the spindle nose (holder gauge length 70 mm, as in the Machine model) */}
+          <ZCyl p={[0, 0, overhang + 52]} r={31} h={16} m={{ color: '#334155', metalness: 0.6, roughness: 0.4 }} />
+          <ZCyl p={[0, 0, overhang + 65]} r={20} r2={14} h={10} m={{ color: '#5b6573', metalness: 0.8, roughness: 0.3 }} />
         </group>
       </group>
       {showDims && (
