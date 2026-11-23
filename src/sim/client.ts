@@ -4,12 +4,13 @@ import { simulate } from '../physics/process';
 import { simulatePocket } from '../physics/pocketProcess';
 import { analyseChatter, timeDomainBoundary, type ChatterParams, type ChatterResult } from '../physics/chatter';
 import { simulateTurning, type TurningParams, type TurnResult } from '../physics/turning';
+import { simulateFixture, type FixtureParams, type FixResult } from '../physics/fixture';
 import SimWorker from './worker?worker&inline';
 
-type Kind = 'thinwall' | 'pocket' | 'chatter' | 'chatterBoundary' | 'turning';
+type Kind = 'thinwall' | 'pocket' | 'chatter' | 'chatterBoundary' | 'turning' | 'fixture';
 let worker: Worker | null = null;
 let seq = 0;
-const latest: Record<Kind, number> = { thinwall: 0, pocket: 0, chatter: 0, chatterBoundary: 0, turning: 0 };
+const latest: Record<Kind, number> = { thinwall: 0, pocket: 0, chatter: 0, chatterBoundary: 0, turning: 0, fixture: 0 };
 const pending = new Map<number, { resolve: (r: { result: unknown; ms: number }) => void; reject: (e: unknown) => void }>();
 
 function getWorker(): Worker | null {
@@ -60,6 +61,9 @@ export function runChatterBoundary(params: ChatterParams) {
 }
 export function runTurning(params: TurningParams) {
   return run<TurnResult>('turning', params, () => simulateTurning(params));
+}
+export function runFixture(params: FixtureParams) {
+  return run<FixResult>('fixture', params, () => simulateFixture(params));
 }
 export function latestRequestId(kind: Kind = 'thinwall') {
   return latest[kind];

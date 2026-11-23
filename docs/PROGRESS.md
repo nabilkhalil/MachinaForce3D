@@ -1,5 +1,21 @@
 # Progress log
 
+## Milestone 5 — 2026-11-23: Module 5, workpiece movement and fixture stiffness ✅
+
+Delivered
+- `src/physics/fixture.ts`: rigid 6-DOF workpiece on 3-2-1 point contacts (compression-only normal springs, tangential stick springs, Coulomb friction), Hertz-type contact stiffening, clamping step (preloads + gravity) and incremental cutting step with active-set lift-off / slip / re-engagement; cutting force from the Module 1 model over one tooth pitch at every station; feature errors in the datum frame, friction reserve, minimum clamp-force multiplier (clamping safety factor), force-direction check, fixture natural frequencies, clamp-force sweep, static push test.
+- Scene: subplate, locator pins and posts, strap and screw clamps on the machining centre; the block drawn with its exaggerated rigid-body motion; pads coloured by contact state; slot cut progressively with the floor coloured by |error| / tolerance; contact-force labels; "part not held" banner.
+- Panels: workpiece, fixture (layout, clamps, end clamp, μ, stiffness), slot operation; results (mean force and direction check, security, slot errors, contact table, warnings); charts (slot error along X, contact normal and friction forces, cutting force on the part over a revolution, clamping-force study, trials); CSV exports.
+- Learning: Module 5 Stage A/B/C, keyway-slot production problem (verified failing baseline, verified solvable), scoring, report; Validate: static push test and CMM slot errors.
+- 20 new tests (129 total).
+
+Findings
+- Default good layout (3 × 3000 N top, 2000 N side, μ = 0.25): slot position error ≈ 11 µm, depth ≈ 2 µm, clamping safety factor ≈ 1.8.
+- Bunching the locators near the middle raises the slot error ≈ 4× and the tilt ≈ 6× and makes the part slip; placing clamps away from the locators unseats a base locator during clamping.
+- In full-width slotting the largest mean force is perpendicular to the feed: feeding −X instead of +X pushes the part into the side clamp instead of the side locators and lowers the safety factor (≈ 1.8 → 1.3).
+- Doubling the clamp forces doubles the friction reserve but lowers the slot error by only ≈ 20 % (k ∝ N^1/3).
+
+
 ## Milestone 4 — 2026-11-22: Module 4, cutting-force components in turning slender shafts ✅
 
 Delivered
@@ -79,6 +95,5 @@ Known limitations / not yet done
 
 ## Next milestones (proposed)
 - M2: calibration wizard; holder compliance; within-pass stiffness update option; performance (incremental FE).
-- M3: Module 5 (fixture stiffness) reusing the current engine.
 - M4: Module 3 chatter with a separate regenerative (delay) model and stability lobes; Module 6 tool wear.
 - M5: Module 4 turning of slender shafts; optional Supabase for class results; Cloudflare deployment after approval.

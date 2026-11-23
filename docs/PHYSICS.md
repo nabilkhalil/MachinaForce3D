@@ -177,3 +177,27 @@ n = 1000 vc/(π d0) (constant spindle speed), vf = f·n, Pc = Fc·vc/60 000, M =
 
 ## Limits
 Quasi-static (no whirling or chatter; see Module 3 for dynamics), linear support springs, no thermal growth, no tool wear, no chip-flow-dependent Fc direction, kinematic roughness only.
+
+
+---
+
+# Module 5 — Workpiece movement and fixture stiffness
+
+File: `fixture.ts`.
+
+## Model
+The workpiece is a rigid block (150 × 80 × 50 mm by default) with 6 DOF about its centroid c: q = (δx, δy, δz, θx, θy, θz), u(p) = δ + θ × (p − c) (small rotations). Locating follows the 3-2-1 principle: 3 base locators (normal +Z), 2 side locators (+Y), 1 end locator (+X). Clamps push along −Z (top straps), −Y (side screw) and optionally −X (end screw). Three layouts: *good* (spread locators, a top clamp directly above each base locator, side clamp opposite the side locators), *narrow* (locators bunched near the middle) and *off-locator* (two top clamps where there is no locator underneath, side clamp high).
+
+## Contacts
+Each element is a point contact with a compression-only normal spring k_n and two tangential stick springs k_t = 0.5 k_n, limited by Coulomb friction |T| ≤ μN. A spring along unit vector d at p adds k JᵀJ to the 6 × 6 stiffness, J = [d, (p − c) × d]. Contact stiffness for the cut step is linearised about the clamped state with Hertz-type stiffening k = k_ref (N0 / 1 kN)^(1/3) (floor 50 N).
+
+## Load steps
+1. **Clamping:** clamp preloads P (force-controlled) + gravity on the locator normal springs; locators that go into tension are released (active set). Result: N0 at every contact. A configuration is rejected (`ok = false`) when a locator that some clamp pushes toward is unseated; an end locator without an end clamp may stay unloaded.
+2. **Cutting:** the force on the workpiece W = −F_tool from the Module 1 mechanistic model (full-width slot, ae = D, down-milling convention for the engaged half, 30° helix) at (x_tool, Y_slot, Z_top − ap/2), sampled at 24 angles over one tooth pitch at each station. Incremental solution K q = W + W_lift + W_slip with active-set iterations: lift-off when N = N0 − k_n(u·n) < 0 (its clamped force is then released), slip when |T| > μN (the stick springs are replaced by a Coulomb force μN opposing the slip direction), re-engagement of an unloaded contact when its trial normal force becomes compressive.
+
+## Outputs
+Feature error in the datum frame e = −u(cutting point) (mean over the revolution): slot position eY, depth eZ, straightness and flatness along X, tilt. Friction reserve min μN/|T| over preloaded contacts (contacts carrying < 1 % of the largest clamp force are excluded: they may micro-slip without moving the part). Clamping safety factor = 1 / (smallest common clamp multiplier for which μN ≥ |T| and N > 0 everywhere), by bisection on a coarse path. Force-direction check per axis (into the locators or into a clamp / friction). Fixture modes from K φ = ω² M φ with M = diag(m, m, m, Ixx, Iyy, Izz) (Jacobi), compared with the tooth-passing frequency. Static push test for validation.
+
+## Limits
+Rigid part (no bending of the workpiece or clamping distortion), point contacts, illustrative stiffness and friction, quasi-static (the fixture modes are information only), stations independent (no accumulated slip), no tool deflection or machine error in the feature error.
+

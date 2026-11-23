@@ -14,6 +14,8 @@ import { ChatterScene, chatterForceView } from './m3/ChatterScene';
 import { useChatter } from '../state/chatterStore';
 import { useTurning } from '../state/turningStore';
 import { LatheScene } from './m4/LatheScene';
+import { useFixture } from '../state/fixtureStore';
+import { FixtureScene, fixtureForceView } from './m5/FixtureScene';
 
 function Env() {
   const { gl, scene } = useThree();
@@ -33,7 +35,8 @@ function PlaybackDriver() {
   const r2 = usePocket((s) => s.result);
   const r3 = useChatter((s) => s.result);
   const r4 = useTurning((s) => s.result);
-  const nStations = module === 4 ? (r4 ? r4.stations.length : 0) : module === 3 ? (r3 ? r3.sim.x.length : 0) : module === 2 ? (r2 ? r2.stations.length : 0) : r1 ? r1.stations.length : 0;
+  const r5 = useFixture((s) => s.result);
+  const nStations = module === 5 ? (r5 ? r5.stations.length : 0) : module === 4 ? (r4 ? r4.stations.length : 0) : module === 3 ? (r3 ? r3.sim.x.length : 0) : module === 2 ? (r2 ? r2.stations.length : 0) : r1 ? r1.stations.length : 0;
   const rate = module === 3 ? (r3 ? r3.sim.stepsPerTooth * 2 : 128) : 4; // module 3: 2 tooth periods per second at 1×
   const result = nStations > 0 ? { stations: { length: nStations } } : null;
   const setCursor = useApp((s) => s.setCursor);
@@ -121,6 +124,7 @@ function CameraRig() {
   const L2 = usePocket((s) => s.params.wallLength);
   const H2 = usePocket((s) => s.params.pocketDepth);
   const L4 = useTurning((s) => s.params.L);
+  const fx = useFixture((s) => s.params);
   const L = module === 3 ? 80 : module === 2 ? L2 : L1, H = module === 3 ? 20 : module === 2 ? H2 : H1;
   const preset = useApp((s) => s.view.camPreset);
   const nonce = useApp((s) => s.view.camNonce);
@@ -143,11 +147,23 @@ function CameraRig() {
       controls.update();
       return;
     }
+    if (module === 5) {
+      // block 0..Lx × 0..Ly × 0..Lz (machine) → centre in three (Lx/2, Lz/2, −Ly/2)
+      const t5 = new THREE.Vector3(fx.Lx / 2, fx.Lz / 2, -fx.Ly / 2);
+      const d5: Record<string, [number, number, number]> = {
+        iso: [250, 230, 340], front: [0, 40, 420], top: [0, 460, 1], side: [440, 50, 0], machine: [900, 600, 1500],
+      };
+      const o = d5[preset] ?? d5.iso;
+      controls.target.copy(preset === 'machine' ? new THREE.Vector3(0, 150, -200) : t5);
+      camera.position.set(t5.x + o[0], t5.y + o[1], t5.z + o[2]);
+      controls.update();
+      return;
+    }
     const off = d[preset] ?? d.iso;
     controls.target.copy(preset === 'machine' ? new THREE.Vector3(0, 150, -200) : t);
     camera.position.set(t.x + off[0], t.y + off[1], t.z + off[2]);
     controls.update();
-  }, [controls, camera, L, H, L4, preset, nonce, module]);
+  }, [controls, camera, L, H, L4, fx.Lx, fx.Ly, fx.Lz, preset, nonce, module]);
   return null;
 }
 
@@ -173,7 +189,9 @@ export function LabScene() {
       {/* Machine frame: Z up. three.js is Y-up, so rotate −90° about X: (x, y, z) → (x, z, −y). */}
       <group rotation={[-Math.PI / 2, 0, 0]}>
         {showMachine && module !== 4 && <Machine />}
-        {module === 4 ? null : module === 1 ? (
+        {module === 4 ? null : module === 5 ? (
+          <FixtureScene />
+        ) : module === 1 ? (
           <>
             <Fixture />
             <WallMesh />
@@ -193,8 +211,8 @@ export function LabScene() {
         <Dimensions />
         <PocketDims />
         {/* shared across modules so their Html labels are never unmounted */}
-        <Forces getView={module === 3 ? chatterForceView : module === 2 ? pocketForceView : module1ForceView} enabled={module !== 4} />
-        <AxisTriad at={[-24, -26, 0]} visible={module !== 4} />
+        <Forces getView={module === 5 ? fixtureForceView : module === 3 ? chatterForceView : module === 2 ? pocketForceView : module1ForceView} enabled={module !== 4} />
+        <AxisTriad at={module === 5 ? [-50, -50, 0] : [-24, -26, 0]} visible={module !== 4} />
       </group>
       {/* Lathe frame (Module 4): lathe (x, y, z) → three (z, y, −x): spindle axis along world X,
           the tool on the far side of the shaft (rear-turret convention, +X away from the operator). */}

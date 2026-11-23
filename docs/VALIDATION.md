@@ -1,6 +1,6 @@
 # Verification record
 
-Run with `npm test`. Last run: 2026-11-22, **109 / 109 passed** (Module 1: 47, Module 2: 21, Module 3: 20, Module 4: 21)
+Run with `npm test`. Last run: 2026-11-23, **129 / 129 passed** (Module 1: 47, Module 2: 21, Module 3: 20, Module 4: 21, Module 5: 20)
 
 Verification shows that the equations are implemented and solved correctly against
 analytical benchmarks. It does **not** validate the cutting coefficients or the physical
@@ -33,6 +33,12 @@ measured forces and measured wall thickness (see the in-app *Validate* stage).
 | **M4** Shaft natural frequency | cantilever (1.875²/2π)√(EI/ρAL⁴) | ≤ 2 % |
 | **M4** Deflection coupling | sharp tool: e = c·g·ap/(1 + c·g) | ≤ 1e-6 |
 | **M4** Power, roughness | Pc = Fc·vc/60 000, Ra = f²/(32 rε) | exact |
+| **M5** Clamped-state equilibrium | ΣF = 0 and ΣM = 0 over contact forces + gravity; base locators carry 3P + W | ≤ 1e-6 N, 1e-4 N·mm |
+| **M5** Cut-step equilibrium | cutting force = Σ change of contact forces rebuilt from the spring laws | ≤ 1e-6 N |
+| **M5** Pure push through the stiffness centre | settlement = F / Σk_z, no tilt | ≤ 5 % |
+| **M5** Friction law | slip safety factor ∝ μ (0.25 → 0.4) | ≤ 5 % |
+| **M5** Minimum clamp force | at 1.05 × required multiplier the path holds; at 0.8 × it fails | pass/fail |
+| **M5** Fixture natural frequency | √(Σk/m)/2π within the range of the six computed modes | order of magnitude |
 
 ## Test list
 
@@ -145,3 +151,23 @@ measured forces and measured wall thickness (see the in-app *Validate* stage).
 - Turning process > spring pass and rough–finish reduce the error
 - Module 4 production problem > the baseline fails
 - Module 4 production problem > an admissible solution exists
+- Rigid-body fixture statics > solve6 solves a well-conditioned 6×6 system
+- Rigid-body fixture statics > 3-2-1 layout: 6 locators whose normals span all six DOF; clamps oppose locators
+- Rigid-body fixture statics > clamped state is in equilibrium: Σ contact forces + gravity = 0 (forces and moments)
+- Rigid-body fixture statics > clamps directly over the base locators: each base locator carries its clamp force (+ gravity share)
+- Rigid-body fixture statics > end locator without end clamp is unloaded but allowed; clamps away from the locators unseat a locator
+- Rigid-body fixture statics > pure Z push at the centroid over a symmetric seated set: settlement = F / Σk_z (no tilt)
+- Rigid-body fixture statics > incremental cut equilibrium: cutting force = Σ change of contact forces (normal + friction)
+- Rigid-body fixture statics > natural frequency of a block on springs: f = √(k/m)/2π for the Z mode (sanity, order of magnitude)
+- Lift-off, slip and clamping safety > a force pulling the part off the base locators makes them lift off
+- Lift-off, slip and clamping safety > a large tangential force with small clamping makes a contact slip
+- Lift-off, slip and clamping safety > slip safety factor scales ≈ with clamp force and exactly with μ
+- Lift-off, slip and clamping safety > minimum clamp multiplier: at required scale the path just holds, below it does not
+- Cutting load and feature error > slot force direction: +X feed pushes the part into the side locators; −X into the side clamp
+- Cutting load and feature error > feature error = −(displacement at the cutting point), and scales linearly with the force (ap)
+- Cutting load and feature error > locator spread: the narrow layout gives a much larger slot error and tilt than the good layout
+- Cutting load and feature error > static push test returns a displacement along the force and agrees with the cut response
+- Cutting load and feature error > error interpolation along the slot is inside the station range
+- Stage C production problem > baseline fails
+- Stage C production problem > the known solution passes every requirement
+- Stage C production problem > only raising the clamp force on the poor layout is not enough

@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.5.0 — 23 November 2026
+- **Module 5: Workpiece movement and fixture stiffness in milling.** Rigid block on a 3-2-1 fixture with compliant, compression-only contacts and Coulomb friction; lift-off and slip detection; clamping safety factor; three fixture layouts, clamp forces, end clamp, pad friction and feed direction; slot-position and depth errors in the datum frame; fixture natural frequencies; clamping-force study; Stage A/B/C content, production problem, push-test and CMM validation, worksheet.
+- 129 verification tests.
+
 ## v0.4.0 — 22 November 2026
 - **Module 4: Cutting-force components in CNC turning of slender shafts.** Fc/Ff/Fp with a nose-radius equivalent edge, beam FE shaft with chuck / tailstock / centres / steady rest, diameter-error profile, power, torque and theoretical roughness, lathe scene in the ISO lathe frame, Stage A/B/C content, production problem, dynamometer and micrometer validation, worksheet.
 - 109 verification tests.

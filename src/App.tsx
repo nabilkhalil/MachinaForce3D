@@ -18,15 +18,20 @@ import { ResultsPanel4 } from './ui/m4/ResultsPanel4';
 import { BottomPanel4 } from './ui/m4/BottomPanel4';
 import { useTurning } from './state/turningStore';
 import { TURNING_ASSUMPTIONS } from './content/turning';
+import { ParamPanel5 } from './ui/m5/ParamPanel5';
+import { ResultsPanel5 } from './ui/m5/ResultsPanel5';
+import { BottomPanel5 } from './ui/m5/BottomPanel5';
+import { useFixture } from './state/fixtureStore';
+import { FIXTURE_ASSUMPTIONS } from './content/fixture';
 import { useEffect } from 'react';
 import { StagePanel } from './ui/StagePanel';
 import { Btn, Modal, Tag, Toggle } from './ui/controls';
 import { useApp, type ModuleId, type Stage, type ViewState } from './state/store';
 
-const pick = <T,>(m: number, a: T, b: T, c: T, d: T) => (m === 4 ? d : m === 3 ? c : m === 2 ? b : a);
-const ParamPanel = () => pick(useApp((s) => s.module), <ParamPanel1 />, <ParamPanel2 />, <ParamPanel3 />, <ParamPanel4 />);
-const ResultsPanel = () => pick(useApp((s) => s.module), <ResultsPanel1 />, <ResultsPanel2 />, <ResultsPanel3 />, <ResultsPanel4 />);
-const BottomPanel = () => pick(useApp((s) => s.module), <BottomPanel1 />, <BottomPanel2 />, <BottomPanel3 />, <BottomPanel4 />);
+const pick = <T,>(m: number, a: T, b: T, c: T, d: T, e: T) => (m === 5 ? e : m === 4 ? d : m === 3 ? c : m === 2 ? b : a);
+const ParamPanel = () => pick(useApp((s) => s.module), <ParamPanel1 />, <ParamPanel2 />, <ParamPanel3 />, <ParamPanel4 />, <ParamPanel5 />);
+const ResultsPanel = () => pick(useApp((s) => s.module), <ResultsPanel1 />, <ResultsPanel2 />, <ResultsPanel3 />, <ResultsPanel4 />, <ResultsPanel5 />);
+const BottomPanel = () => pick(useApp((s) => s.module), <BottomPanel1 />, <BottomPanel2 />, <BottomPanel3 />, <BottomPanel4 />, <BottomPanel5 />);
 import { ASSUMPTIONS, MODULES, REFERENCES } from './content/learning';
 import { FORCE_COLORS } from './scene/Forces';
 
@@ -54,11 +59,12 @@ function ViewToolbar() {
           </label>
           <label className="block text-[11px] text-slate-400">
             Deformation ×{v.exaggeration} {v.exaggeration > 1 && <span className="text-amber-300">(exaggerated)</span>}
-            <input type="range" min={1} max={100} step={1} value={v.exaggeration} onChange={(e) => setView({ exaggeration: Number(e.target.value) })} className="w-full" />
+            <input type="range" min={1} max={module === 5 ? 2000 : 100} step={1} value={v.exaggeration} onChange={(e) => setView({ exaggeration: Number(e.target.value) })} className="w-full" />
           </label>
           {module === 1 && <Toggle label="Undeformed ghost" checked={v.showGhost} onChange={t('showGhost')} />}
           {module === 2 && <p className="text-[10px] leading-snug text-slate-500">Exaggeration applies to tool bending and to the wall offset. Wall colour = deviation from nominal.</p>}
           {module === 3 && <p className="text-[10px] leading-snug text-slate-500">Exaggeration applies to the simulated tool vibration. Machined-face colour = vibration amplitude (chatter marks).</p>}
+          {module === 5 && <p className="text-[10px] leading-snug text-slate-500">Exaggeration applies to the rigid-body motion of the block on its contacts (µm-scale). Pads: green stick, amber slip, red lift-off. Slot floor colour = |error| / tolerance.</p>}
           {module === 4 && <p className="text-[10px] leading-snug text-slate-500">Lathe frame: Z = spindle axis, X toward the tool (rear turret), Y up. Exaggeration applies to the shaft centre-line deflection. Shaft colour = diameter deviation.</p>}
           <div className={`flex items-center gap-1 text-[11px] ${module !== 1 ? 'hidden' : ''}`}>
             <span className="text-slate-400">Colour</span>
@@ -162,6 +168,19 @@ n = 1000 vc / (π D)     Pc = Fc · vc / 60 000 [kW]     M = Fc · D/2     Q = v
 Shaft: beam FE with chuck (kT, kR), tailstock / centres (k), steady rest (k);  closed forms: PL³/3EI, PL³/48EI
 Generated diameter:  d = d_target + 2e,   e = (C_shaft(z) + 1/k_tool) · Fp(ap − e)`}</pre>
         </section>
+        <section>
+          <h3 className="font-semibold text-cyan-300">Module 5 — fixture (rigid block on 3-2-1 point contacts)</h3>
+          <pre className="whitespace-pre-wrap rounded bg-slate-950 p-2 text-[12px] text-slate-200">{`q = (δx, δy, δz, θx, θy, θz) about the centroid c;   u(p) = δ + θ × (p − c)
+Contact i at p_i, normal n_i (direction it pushes the part):  J_i = [n_i, (p_i − c) × n_i]
+K = Σ k_n J_iᵀJ_i + Σ k_t (two tangents)        K q = W_cut + W(clamps, slip, lift-off)
+Normal force N_i = N0_i − k_n (u_i · n_i) ≥ 0 (else lift-off);  friction |T_i| ≤ μ N_i (else slip)
+Contact stiffness:  k = k_ref (N0 / 1 kN)^(1/3)   (Hertz-type)
+Clamping step: clamp preloads P + gravity on the locator springs → N0
+Cut step: W_cut = −F_tool (Module 1 model, slot ae = D) at (x_tool, Y_slot, Z_top − ap/2)
+Feature error (datum frame):  e = −u(cutting point)      (generated on the displaced part, springs back)
+Clamping safety factor = 1 / (smallest clamp multiplier with μN ≥ |T| and N > 0 everywhere)
+Fixture modes:  K φ = ω² M φ,  M = diag(m, m, m, Ixx, Iyy, Izz)`}</pre>
+        </section>
       </div>
     </Modal>
   );
@@ -175,7 +194,7 @@ function AssumptionsModal({ onClose }: { onClose: () => void }) {
         <Tag kind="validated">calibrated</Tag><span className="text-slate-400">coefficients you confirmed from your own tests (validation still requires comparison with measurements)</span>
         <Tag kind="assumption">assumption</Tag><span className="text-slate-400">modelling idealisation</span>
       </div>
-      {[...ASSUMPTIONS, ...POCKET_ASSUMPTIONS, ...CHATTER_ASSUMPTIONS, ...TURNING_ASSUMPTIONS].map((g) => (
+      {[...ASSUMPTIONS, ...POCKET_ASSUMPTIONS, ...CHATTER_ASSUMPTIONS, ...TURNING_ASSUMPTIONS, ...FIXTURE_ASSUMPTIONS].map((g) => (
         <div key={g.title} className="mb-3">
           <h3 className="font-semibold text-cyan-300">{g.title}</h3>
           <ul className="ml-5 list-disc space-y-0.5 text-[13px] text-slate-300">{g.items.map((i) => <li key={i}>{i}</li>)}</ul>
@@ -236,19 +255,22 @@ export default function App() {
   const reset2 = usePocket((s) => s.resetParams);
   const reset3 = useChatter((s) => s.resetParams);
   const reset4 = useTurning((s) => s.resetParams);
-  const reset = pick(module, reset1, reset2, reset3, reset4);
+  const reset5 = useFixture((s) => s.resetParams);
+  const reset = pick(module, reset1, reset2, reset3, reset4, reset5);
   const err1 = useApp((s) => s.error);
   const err2 = usePocket((s) => s.error);
   const err3 = useChatter((s) => s.error);
   const err4 = useTurning((s) => s.error);
-  const error = pick(module, err1, err2, err3, err4);
+  const err5 = useFixture((s) => s.error);
+  const error = pick(module, err1, err2, err3, err4, err5);
   useEffect(() => {
     if (module === 2) usePocket.getState().start();
     if (module === 3) useChatter.getState().start();
     if (module === 4) useTurning.getState().start();
+    if (module === 5) useFixture.getState().start();
   }, [module]);
   useEffect(() => {
-    try { const m = /#module-([1234])/.exec(location.hash); if (m) setModule(Number(m[1]) as ModuleId); } catch { /* sandboxed */ }
+    try { const m = /#module-([12345])/.exec(location.hash); if (m) setModule(Number(m[1]) as ModuleId); } catch { /* sandboxed */ }
   }, [setModule]);
   const [modal, setModal] = useState<null | 'model' | 'assume' | 'refs' | 'modules'>(null);
   const [rightTab, setRightTab] = useState<'results' | 'guide'>('results');
