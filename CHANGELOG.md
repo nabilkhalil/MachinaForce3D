@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.6.0 — 23 November 2026
+- **Module 6: Tool wear evolution and cutting force in CNC end milling.** Flank wear VB in the edge coefficients; forces, power and specific energy versus VB; illustrative wear-growth model and tool-replacement plan (ISO 8688-2 VB 0.3 mm criterion, adjustable); cutting-edge close-up; Stage A/B/C content and production problem; force-vs-VB and wear-rate fitting.
+- 146 verification tests.
+
 ## v0.5.0 — 23 November 2026
 - **Module 5: Workpiece movement and fixture stiffness in milling.** Rigid block on a 3-2-1 fixture with compliant, compression-only contacts and Coulomb friction; lift-off and slip detection; clamping safety factor; three fixture layouts, clamp forces, end clamp, pad friction and feed direction; slot-position and depth errors in the datum frame; fixture natural frequencies; clamping-force study; Stage A/B/C content, production problem, push-test and CMM validation, worksheet.
 - 129 verification tests.

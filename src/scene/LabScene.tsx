@@ -16,6 +16,8 @@ import { useTurning } from '../state/turningStore';
 import { LatheScene } from './m4/LatheScene';
 import { useFixture } from '../state/fixtureStore';
 import { FixtureScene, fixtureForceView } from './m5/FixtureScene';
+import { useToolWear } from '../state/toolWearStore';
+import { ToolWearLabel, ToolWearScene, toolWearForceView } from './m6/ToolWearScene';
 
 function Env() {
   const { gl, scene } = useThree();
@@ -36,7 +38,8 @@ function PlaybackDriver() {
   const r3 = useChatter((s) => s.result);
   const r4 = useTurning((s) => s.result);
   const r5 = useFixture((s) => s.result);
-  const nStations = module === 5 ? (r5 ? r5.stations.length : 0) : module === 4 ? (r4 ? r4.stations.length : 0) : module === 3 ? (r3 ? r3.sim.x.length : 0) : module === 2 ? (r2 ? r2.stations.length : 0) : r1 ? r1.stations.length : 0;
+  const r6 = useToolWear((s) => s.result);
+  const nStations = module === 6 ? (r6 ? r6.timeline.length : 0) : module === 5 ? (r5 ? r5.stations.length : 0) : module === 4 ? (r4 ? r4.stations.length : 0) : module === 3 ? (r3 ? r3.sim.x.length : 0) : module === 2 ? (r2 ? r2.stations.length : 0) : r1 ? r1.stations.length : 0;
   const rate = module === 3 ? (r3 ? r3.sim.stepsPerTooth * 2 : 128) : 4; // module 3: 2 tooth periods per second at 1×
   const result = nStations > 0 ? { stations: { length: nStations } } : null;
   const setCursor = useApp((s) => s.setCursor);
@@ -125,7 +128,7 @@ function CameraRig() {
   const H2 = usePocket((s) => s.params.pocketDepth);
   const L4 = useTurning((s) => s.params.L);
   const fx = useFixture((s) => s.params);
-  const L = module === 3 ? 80 : module === 2 ? L2 : L1, H = module === 3 ? 20 : module === 2 ? H2 : H1;
+  const L = module === 6 ? 100 : module === 3 ? 80 : module === 2 ? L2 : L1, H = module === 6 || module === 3 ? 20 : module === 2 ? H2 : H1;
   const preset = useApp((s) => s.view.camPreset);
   const nonce = useApp((s) => s.view.camNonce);
   useEffect(() => {
@@ -189,7 +192,12 @@ export function LabScene() {
       {/* Machine frame: Z up. three.js is Y-up, so rotate −90° about X: (x, y, z) → (x, z, −y). */}
       <group rotation={[-Math.PI / 2, 0, 0]}>
         {showMachine && module !== 4 && <Machine />}
-        {module === 4 ? null : module === 5 ? (
+        {module === 4 ? null : module === 6 ? (
+          <>
+            <Fixture />
+            <ToolWearScene />
+          </>
+        ) : module === 5 ? (
           <FixtureScene />
         ) : module === 1 ? (
           <>
@@ -210,8 +218,9 @@ export function LabScene() {
         )}
         <Dimensions />
         <PocketDims />
+        <ToolWearLabel />
         {/* shared across modules so their Html labels are never unmounted */}
-        <Forces getView={module === 5 ? fixtureForceView : module === 3 ? chatterForceView : module === 2 ? pocketForceView : module1ForceView} enabled={module !== 4} />
+        <Forces getView={module === 6 ? toolWearForceView : module === 5 ? fixtureForceView : module === 3 ? chatterForceView : module === 2 ? pocketForceView : module1ForceView} enabled={module !== 4} />
         <AxisTriad at={module === 5 ? [-50, -50, 0] : [-24, -26, 0]} visible={module !== 4} />
       </group>
       {/* Lathe frame (Module 4): lathe (x, y, z) → three (z, y, −x): spindle axis along world X,

@@ -1,5 +1,18 @@
 # Progress log
 
+## Milestone 6 — 2026-11-23: Module 6, tool wear evolution and cutting force ✅
+
+Delivered
+- `src/physics/toolWear.ts`: wear-dependent edge coefficients, forces/torque/power/specific energy vs VB, illustrative wear-rate model, condition indicator, qualitative roughness risk, tool-replacement and batch plan, wear-coefficient and wear-rate fitting.
+- Scene: side finishing on the machining centre with wear lands on every flute (∝ VB), worn-tool force arrows, inset cutting-edge close-up (fresh edge, wear land, shearing vs ploughing forces).
+- Panels: tool condition, cutting conditions, growth model, production planning, wear and force coefficients; charts (forces vs angle fresh/worn, force vs VB, power & energy vs VB, wear vs time, fresh vs worn, trials); CSV exports; Stage A/B/C (3 MCQs each), titanium tool-change production problem (failing baseline and solvability tested), report; Validate: force-vs-VB fit and VB-vs-time fit.
+- 17 new tests (146 total).
+
+Findings (illustrative coefficients)
+- Ti-6Al-4V finishing (ae = 0.1 D): VB 0 → 0.3 mm raises the mean resultant force ≈ 85 % and power ≈ 50 %; the radial (thrust) tooth force grows faster than the tangential one.
+- With p = 3, q = 1, lowering vc and raising fz at constant vf multiplies the parts per tool; the binding constraint becomes the peak force at the criterion.
+
+
 ## Milestone 5 — 2026-11-23: Module 5, workpiece movement and fixture stiffness ✅
 
 Delivered
@@ -95,5 +108,4 @@ Known limitations / not yet done
 
 ## Next milestones (proposed)
 - M2: calibration wizard; holder compliance; within-pass stiffness update option; performance (incremental FE).
-- M4: Module 3 chatter with a separate regenerative (delay) model and stability lobes; Module 6 tool wear.
 - M5: Module 4 turning of slender shafts; optional Supabase for class results; Cloudflare deployment after approval.

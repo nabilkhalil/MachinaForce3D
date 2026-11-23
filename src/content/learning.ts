@@ -184,7 +184,7 @@ export const MODULES: ModuleInfo[] = [
   { id: 3, title: 'Chatter and dynamic instability', status: 'operational', note: 'Separate dynamic model: 2-DOF tool modes, ZOA stability lobes cross-checked by a time-domain regenerative simulation; forced vibration vs chatter; tap-test fitting.' },
   { id: 4, title: 'Cutting-force components in turning slender shafts', status: 'operational', note: 'Fc/Ff/Fp with nose-radius equivalent edge, beam FE shaft with chuck/tailstock/centres/steady rest, diameter-error profile, power and roughness.' },
   { id: 5, title: 'Workpiece movement and fixture stiffness', status: 'operational', note: 'Slot milling of a block on a 3-2-1 fixture: rigid-body motion on compliant contacts, lift-off and friction slip, clamping safety factor, locator layout, feed direction and fixture natural frequencies.' },
-  { id: 6, title: 'Tool wear and rising cutting forces in difficult alloys', status: 'planned', note: 'Not yet implemented.' },
+  { id: 6, title: 'Tool wear evolution and cutting force in end milling', status: 'operational', note: 'Flank wear VB raises the edge (ploughing) force coefficients: forces, power and specific energy versus VB, cutting-edge close-up, illustrative wear-growth model, replacement criterion (ISO 8688-2 VB 0.3 mm) and tool-change planning.' },
 ];
 
 export const ASSUMPTIONS: { title: string; items: string[] }[] = [

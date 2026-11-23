@@ -3,7 +3,7 @@ import { DEFAULT_PARAMS, type ProcessParams, type SimResult, type SimSummary } f
 import { runSimulation, latestRequestId } from '../sim/client';
 
 export type Stage = 'observe' | 'experiment' | 'solve' | 'validate';
-export type ModuleId = 1 | 2 | 3 | 4 | 5;
+export type ModuleId = 1 | 2 | 3 | 4 | 5 | 6;
 export type ColorMode = 'displacement' | 'thickness';
 export type ForceOn = 'tool' | 'workpiece';
 
@@ -128,9 +128,9 @@ export const useApp = create<AppState>((set, get) => {
       // fixture motion is µm-scale: Module 5 needs a much larger exaggeration than the others
       const ex = get().view.exaggeration;
       const exaggeration = m === 5 ? (ex <= 100 ? 400 : ex) : Math.min(ex, 100);
-      // slot forces are ~1 kN: shorter arrows in Module 5
       const fs = get().view.forceScale;
-      const forceScale = m === 5 ? Math.min(fs, 0.06) : get().module === 5 ? 0.35 : fs;
+      const big = (k: number) => k === 5 || k === 6; // ~1 kN forces → shorter arrows
+      const forceScale = big(m) ? Math.min(fs, m === 6 ? 0.05 : 0.08) : big(get().module) ? 0.35 : fs;
       set((s) => ({ module: m, playing: false, cursor: { station: 0, phi: playback.phi }, view: { ...s.view, exaggeration, forceScale } }));
       try { history.replaceState(null, '', `#module-${m}`); } catch { /* sandboxed */ }
     },

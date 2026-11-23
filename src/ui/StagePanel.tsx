@@ -10,6 +10,7 @@ import { StagePanel2 } from './m2/StagePanel2';
 import { StagePanel3 } from './m3/StagePanel3';
 import { StagePanel4 } from './m4/StagePanel4';
 import { StagePanel5 } from './m5/StagePanel5';
+import { StagePanel6 } from './m6/StagePanel6';
 
 const KEYWORDS = ['stiff', 'deflect', 'force', 'support', 'thick', 'overhang', 'engagement', 'radial', 'axial', 'spring'];
 
@@ -162,7 +163,7 @@ const INTRO: Record<Stage, { title: string; text: string }> = {
 
 export function StagePanel() {
   const module = useApp((s) => s.module);
-  return module === 5 ? <StagePanel5 /> : module === 4 ? <StagePanel4 /> : module === 3 ? <StagePanel3 /> : module === 2 ? <StagePanel2 /> : <StagePanel1 />;
+  return module === 6 ? <StagePanel6 /> : module === 5 ? <StagePanel5 /> : module === 4 ? <StagePanel4 /> : module === 3 ? <StagePanel3 /> : module === 2 ? <StagePanel2 /> : <StagePanel1 />;
 }
 
 function StagePanel1() {

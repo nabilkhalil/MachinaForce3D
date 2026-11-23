@@ -201,3 +201,25 @@ Feature error in the datum frame e = −u(cutting point) (mean over the revoluti
 ## Limits
 Rigid part (no bending of the workpiece or clamping distortion), point contacts, illustrative stiffness and friction, quasi-static (the fixture modes are information only), stations independent (no accumulated slip), no tool deflection or machine error in the feature error.
 
+
+---
+
+# Module 6 — Tool wear evolution and cutting force
+
+File: `toolWear.ts` (uses `millingForce.ts` unchanged).
+
+## Force model with flank wear
+Flank wear VB (0–0.5 mm, uniform on every tooth) adds a rubbing/ploughing force along the engaged edge, so it enters the edge coefficients: Kte(VB) = Kte0 + ate·VB, Kre(VB) = Kre0 + are·VB, Kae(VB) = Kae0 + aae·VB (K·e in N/mm, a·e in N/mm²; clamped at ≥ 0). Shearing coefficients are unchanged. Defaults ate = 4 Kte0, are = 5 Kre0, aae = 4 Kae0 per mm are illustrative; `fitWearCoefficients` estimates them by least squares from measured mean forces at several VB (the mean force is linear in the edge coefficients).
+
+## Outputs
+Forces over one revolution (30° helix, 0.5 mm slices): mean Fx, Fy, Fz, mean and peak resultant, increase vs VB = 0. Torque T = R·ΣFt, power P = T·ω, specific energy u = P/MRR (J/mm³). Condition indicator from VB/VBc (fresh < 0.25, normal < 0.8, approaching < 1, replace ≥ 1, beyond VBmax 0.5 mm). Roughness: qualitative risk only.
+
+## Wear growth (optional, illustrative)
+dVB/dt = A·(vc/vref)^p·(fz/fref)^q → VB(t) = VB0 + rate·t for fixed conditions (no running-in or accelerated stage). Time to criterion t_c = (VBc − VB0)/rate; parts per tool = floor(t_c/t_part); tools = ⌈batch/parts per tool⌉; total time = batch·t_part + (tools − 1)·t_change. Not a tool-life prediction; Taylor's equation is not used.
+
+## Criterion
+VB = 0.3 mm uniform and VBmax = 0.5 mm localized flank wear are the criteria commonly used in ISO 8688-2 end-milling tool-life tests. They allow tool/condition comparison; a production criterion depends on tolerance, surface and process security.
+
+## Limits
+Uniform flank wear; linear growth of edge forces; no crater wear, chipping, built-up edge, edge radius, runout, temperature, coolant or dynamics; wear does not alter the chip geometry; constant wear rate.
+
